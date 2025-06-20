@@ -1,0 +1,2862 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriSmart - Intelligente Landwirtschaftsplattform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+  <style>
+    /* ===== VARIABLEN ===== */
+    :root {
+      --primary-color: #4CAF50;
+      --primary-dark: #388E3C;
+      --secondary-color: #2C3E50;
+      --secondary-light: #34495e;
+      --light-gray: #f5f9fc;
+      --medium-gray: #e0e0e0;
+      --dark-gray: #333;
+      --error-color: #d32f2f;
+      --warning-color: #FF9800;
+      --success-color: #4CAF50;
+      --info-color: #2196F3;
+      --white: #ffffff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ===== GRUNDLEGENDES LAYOUT ===== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--dark-gray);
+      background-color: var(--light-gray);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ===== APP-CONTAINER ===== */
+    #app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: var(--white);
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+    }
+
+    .user-menu {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      width: 220px;
+      z-index: 100;
+      overflow: hidden;
+      display: none;
+    }
+
+    .dropdown-menu a {
+      display: block;
+      padding: 12px 20px;
+      color: var(--secondary-color);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s;
+    }
+
+    .dropdown-menu a:hover {
+      background-color: var(--light-gray);
+      color: var(--primary-color);
+    }
+
+    .user-menu:hover .dropdown-menu {
+      display: block;
+    }
+
+    /* ===== NAVIGATION ===== */
+    nav {
+      background-color: var(--secondary-color);
+      color: var(--white);
+      padding: 0;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      overflow-x: auto;
+      padding: 0;
+    }
+
+    nav li {
+      flex-shrink: 0;
+    }
+
+    nav a {
+      display: block;
+      padding: 18px 20px;
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 3px solid transparent;
+    }
+
+    nav a:hover, nav li.active a {
+      background-color: var(--secondary-light);
+      border-bottom-color: var(--primary-color);
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    main {
+      flex: 1;
+      padding: 30px 0;
+    }
+
+    .content-section {
+      display: block;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: var(--secondary-color);
+      margin-bottom: 15px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .dashboard-card {
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+    }
+
+    .dashboard-card h3 {
+      font-size: 1.3rem;
+      color: var(--secondary-color);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    /* Wetterkarte */
+    .weather-card .weather-content {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .weather-main {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .weather-icon {
+      font-size: 3rem;
+      color: #FF9800;
+    }
+
+    .weather-temp {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+
+    .temp-value {
+      color: var(--secondary-color);
+    }
+
+    .weather-details {
+      flex: 1;
+    }
+
+    .weather-details p {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .weather-details span {
+      font-weight: 500;
+      color: var(--secondary-color);
+    }
+
+    .weather-footer {
+      font-size: 0.9rem;
+      color: #666;
+      padding-top: 15px;
+      border-top: 1px solid var(--medium-gray);
+    }
+
+    /* Feldstatus-Karte */
+    .fields-card .fields-list {
+      margin-bottom: 20px;
+    }
+
+    .field-item {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .field-name {
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .field-progress {
+      height: 10px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 5px;
+    }
+
+    .field-status {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .btn-view-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* KI-Empfehlungen */
+    .ai-card .ai-recommendations {
+      margin-bottom: 20px;
+    }
+
+    .ai-alert {
+      display: flex;
+      gap: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background-color: #f8f9fa;
+      border-left: 4px solid var(--info-color);
+    }
+
+    .ai-alert i {
+      font-size: 1.5rem;
+      color: var(--info-color);
+    }
+
+    .ai-alert i.fa-exclamation-triangle {
+      color: var(--warning-color);
+    }
+
+    .ai-alert i.fa-calendar-check {
+      color: var(--success-color);
+    }
+
+    .ai-alert strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .btn-ai {
+      background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+      color: var(--white);
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .btn-ai:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Bodenanalyse */
+    .soil-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .soil-metric {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--secondary-color);
+      margin-bottom: 8px;
+    }
+
+    .metric-status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .metric-status.good {
+      background-color: #e8f5e9;
+      color: var(--success-color);
+    }
+
+    .metric-status.medium {
+      background-color: #fff8e1;
+      color: var(--warning-color);
+    }
+
+    .metric-status.poor {
+      background-color: #ffebee;
+      color: var(--error-color);
+    }
+
+    .soil-recommendation {
+      padding: 15px;
+      background-color: #e3f2fd;
+      border-radius: 8px;
+      border-left: 4px solid var(--info-color);
+    }
+
+    /* KI-Assistent */
+    .ai-container {
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .ai-header {
+      padding: 25px;
+      background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+      color: var(--white);
+    }
+
+    .ai-header h2 {
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+
+    .ai-chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 500px;
+    }
+
+    .ai-chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: #fafafa;
+    }
+
+    .message {
+      display: flex;
+      margin-bottom: 20px;
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-right: 15px;
+    }
+
+    .ai-message .message-avatar {
+      background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+    }
+
+    .message-content {
+      flex: 1;
+      max-width: 80%;
+    }
+
+    .message-sender {
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: var(--secondary-color);
+    }
+
+    .ai-message .message-sender {
+      color: var(--secondary-light);
+    }
+
+    .message-text {
+      background-color: var(--white);
+      padding: 15px;
+      border-radius: 0 12px 12px 12px;
+      box-shadow: var(--shadow);
+      line-height: 1.5;
+    }
+
+    .ai-message .message-text {
+      background-color: #edf7ff;
+    }
+
+    .user-message .message-text {
+      background-color: #e8f5e9;
+      border-radius: 12px 0 12px 12px;
+    }
+
+    .ai-chat-input {
+      display: flex;
+      padding: 15px;
+      border-top: 1px solid var(--medium-gray);
+      background-color: var(--white);
+    }
+
+    .ai-chat-input input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 2px solid var(--medium-gray);
+      border-radius: 30px;
+      font-size: 1rem;
+      margin-right: 10px;
+    }
+
+    .ai-chat-input input:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .ai-chat-input button {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: var(--white);
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .ai-chat-input button:hover {
+      transform: scale(1.05);
+    }
+
+    .ai-tools {
+      padding: 25px;
+      border-top: 1px solid var(--medium-gray);
+    }
+
+    .tool-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .tool-card {
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow);
+    }
+
+    .tool-card i {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+
+    .tool-card h4 {
+      margin-bottom: 10px;
+      color: var(--secondary-color);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+      color: var(--white);
+      padding: 50px 0 20px;
+      margin-top: auto;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .footer-brand .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: var(--white);
+    }
+
+    .footer-brand p {
+      line-height: 1.6;
+      max-width: 300px;
+    }
+
+    .link-group h4 {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: var(--white);
+    }
+
+    .link-group a {
+      display: block;
+      color: #ccc;
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: color 0.3s;
+    }
+
+    .link-group a:hover {
+      color: var(--white);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.9rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--white);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .social-links a:hover {
+      background-color: var(--primary-color);
+      transform: translateY(-3px);
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 992px) {
+      .footer-content {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      nav ul {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .footer-bottom {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      nav ul {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+      
+      .message-content {
+        max-width: 90%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .soil-metrics {
+        grid-template-columns: 1fr;
+      }
+      
+      .weather-content {
+        flex-direction: column;
+      }
+    }
+
+    /* ===== MEIN BETRIEB ===== */
+    .farm-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .tab-btn {
+      background-color: var(--light-gray);
+      border: none;
+      border-radius: 30px;
+      padding: 12px 20px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: var(--white);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background-color: #e0e0d0;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .farm-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .farm-card {
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+    }
+
+    .farm-card h3 {
+      font-size: 1.3rem;
+      color: var(--secondary-color);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .farm-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .farm-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .farm-data-form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .farm-data-form {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .farm-form-group {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    .farm-form-group h4 {
+      margin-bottom: 15px;
+      color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .farm-list {
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .farm-item-card {
+      background-color: var(--white);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .farm-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .farm-item-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--secondary-color);
+    }
+
+    .farm-item-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--error-color);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s;
+      min-height: 100px;
+      resize: vertical;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+
+    .no-data {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+    }
+
+    select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: white;
+    }
+
+    select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+
+    /* ===== FELD-MANAGEMENT ===== */
+    .field-management {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 25px;
+    }
+    
+    @media (min-width: 992px) {
+      .field-management {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .field-overview {
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+    }
+    
+    .field-map {
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      height: 500px;
+      position: relative;
+    }
+    
+    #field-map-container {
+      height: 100%;
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .field-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .field-table th {
+      background-color: var(--primary-color);
+      color: white;
+      text-align: left;
+      padding: 12px 15px;
+    }
+    
+    .field-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+    
+    .field-table tr:hover {
+      background-color: #f9f9f9;
+    }
+    
+    .field-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .action-btn {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9rem;
+    }
+    
+    .view-btn {
+      background-color: var(--info-color);
+      color: white;
+    }
+    
+    .edit-btn {
+      background-color: var(--warning-color);
+      color: white;
+    }
+    
+    .delete-btn-table {
+      background-color: var(--error-color);
+      color: white;
+    }
+    
+    .field-detail {
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-top: 25px;
+    }
+    
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .detail-section {
+      margin-bottom: 20px;
+    }
+    
+    .detail-section h4 {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--secondary-color);
+      border-bottom: 1px solid var(--medium-gray);
+      padding-bottom: 8px;
+    }
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .detail-label {
+      font-weight: 500;
+      color: var(--secondary-color);
+    }
+    
+    .detail-value {
+      color: #555;
+    }
+    
+    .history-chart {
+      height: 200px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px;
+      margin-top: 15px;
+    }
+    
+    .chart-bar {
+      flex: 1;
+      background-color: var(--primary-color);
+      margin: 0 5px;
+      position: relative;
+    }
+    
+    .chart-label {
+      position: absolute;
+      bottom: -25px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+    
+    .field-form {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    
+    .map-selector {
+      height: 300px;
+      background-color: #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .map-polygon {
+      position: absolute;
+      border: 2px dashed var(--primary-color);
+      background-color: rgba(76, 175, 80, 0.2);
+    }
+    
+    .map-point {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    /* Kartenwerkzeuge */
+    .map-tools {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .map-tool-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .map-tool-btn i {
+      font-size: 1.2rem;
+    }
+
+    /* Modale Fenster */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      color: var(--secondary-color);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--secondary-color);
+    }
+
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus, 
+    .form-group textarea:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--light-gray);
+      color: var(--secondary-color);
+    }
+  </style>
+</head>
+<body>
+  <!-- Hauptanwendung -->
+  <div id="app-container">
+    <!-- Header -->
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">
+            <i class="fas fa-tractor"></i>
+            <span>AgriSmart</span>
+          </div>
+          
+          <div class="user-menu">
+            <div class="user-info">
+              <img src="https://ui-avatars.com/api/?name=Landwirt&background=4CAF50&color=fff" alt="Profilbild">
+              <span id="username">Max Mustermann</span>
+              <i class="fas fa-caret-down"></i>
+            </div>
+            <div class="dropdown-menu">
+              <a href="#"><i class="fas fa-user-cog"></i> Profil bearbeiten</a>
+              <a href="#"><i class="fas fa-cog"></i> Einstellungen</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hauptnavigation -->
+    <nav>
+      <div class="container">
+        <ul>
+          <li class="active"><a href="#dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+          <li><a href="#fields"><i class="fas fa-tractor"></i> Felder</a></li>
+          <li><a href="#crops"><i class="fas fa-seedling"></i> Kulturen</a></li>
+          <li><a href="#weather"><i class="fas fa-cloud-sun"></i> Wetter & Prognosen</a></li>
+          <li><a href="#soil"><i class="fas fa-mountain"></i> Bodenanalysen</a></li>
+          <li><a href="#reports"><i class="fas fa-chart-bar"></i> Berichte</a></li>
+          <li><a href="#ai"><i class="fas fa-robot"></i> KI-Assistent</a></li>
+          <li><a href="#my-farm"><i class="fas fa-home"></i> Mein Betrieb</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hauptinhalt -->
+    <main class="container">
+      <!-- Dashboard -->
+      <section id="dashboard" class="content-section">
+        <h2><i class="fas fa-home"></i> Dashboard</h2>
+        <p class="subtitle">Übersicht über Ihren Betrieb und aktuelle Informationen</p>
+        
+        <div class="dashboard-grid">
+          <!-- Wetterkarte -->
+          <div class="dashboard-card weather-card">
+            <h3><i class="fas fa-cloud-sun"></i> Wettervorhersage</h3>
+            <div class="weather-content">
+              <div class="weather-main">
+                <div class="weather-icon">
+                  <i class="fas fa-sun"></i>
+                </div>
+                <div class="weather-temp">
+                  <span class="temp-value">22°C</span>
+                </div>
+              </div>
+              <div class="weather-details">
+                <p>Luftfeuchtigkeit: <span>65%</span></p>
+                <p>Windgeschwindigkeit: <span>12 km/h</span></p>
+                <p>Niederschlag: <span>10%</span></p>
+                <p>UV-Index: <span>5</span></p>
+              </div>
+            </div>
+            <div class="weather-footer">
+              7-Tage-Vorhersage: Sonnig mit gelegentlichen Schauern, Temperaturen zwischen 18°C und 25°C.
+            </div>
+          </div>
+          
+          <!-- Feldstatus -->
+          <div class="dashboard-card fields-card">
+            <h3><i class="fas fa-tractor"></i> Feldstatus</h3>
+            <div class="fields-list">
+              <div class="field-item">
+                <div class="field-name">Nordfeld (Weizen)</div>
+                <div class="field-progress">
+                  <div class="progress-bar" style="width: 75%; background-color: var(--primary-color);"></div>
+                </div>
+                <div class="field-status">Wachstumsphase: 75% abgeschlossen</div>
+              </div>
+              <div class="field-item">
+                <div class="field-name">Südfeld (Mais)</div>
+                <div class="field-progress">
+                  <div class="progress-bar" style="width: 45%; background-color: var(--warning-color);"></div>
+                </div>
+                <div class="field-status">Bewässerung erforderlich</div>
+              </div>
+              <div class="field-item">
+                <div class="field-name">Westwiese (Raps)</div>
+                <div class="field-progress">
+                  <div class="progress-bar" style="width: 95%; background-color: var(--success-color);"></div>
+                </div>
+                <div class="field-status">Erntebereit in 5-7 Tagen</div>
+              </div>
+            </div>
+            <a href="#fields" class="btn-view-all">
+              <i class="fas fa-arrow-right"></i> Alle Felder anzeigen
+            </a>
+          </div>
+          
+          <!-- KI-Empfehlungen -->
+          <div class="dashboard-card ai-card">
+            <h3><i class="fas fa-robot"></i> KI-Empfehlungen</h3>
+            <div class="ai-recommendations">
+              <div class="ai-alert">
+                <i class="fas fa-calendar-check"></i>
+                <div>
+                  <strong>Ernteempfehlung</strong>
+                  <p>Weizenernte auf Nordfeld in 10 Tagen planen. Optimaler Feuchtigkeitsgehalt: 14-15%.</p>
+                </div>
+              </div>
+              <div class="ai-alert">
+                <i class="fas fa-tint"></i>
+                <div>
+                  <strong>Bewässerung</strong>
+                  <p>Südfeld benötigt zusätzliche Bewässerung von 20mm in dieser Woche.</p>
+                </div>
+              </div>
+              <div class="ai-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                  <strong>Schädlingswarnung</strong>
+                  <p>Mäßiges Risiko für Kartoffelkäfer. Felder kontrollieren.</p>
+                </div>
+              </div>
+            </div>
+            <button class="btn-ai" onclick="showSection('ai')">
+              <i class="fas fa-comments"></i> KI-Assistent befragen
+            </button>
+          </div>
+          
+          <!-- Bodenanalyse -->
+          <div class="dashboard-card soil-card">
+            <h3><i class="fas fa-mountain"></i> Bodenanalyse</h3>
+            <div class="soil-metrics">
+              <div class="soil-metric">
+                <div class="metric-label">pH-Wert</div>
+                <div class="metric-value">6.8</div>
+                <span class="metric-status good">Optimal</span>
+              </div>
+              <div class="soil-metric">
+                <div class="metric-label">Stickstoff (N)</div>
+                <div class="metric-value">14</div>
+                <span class="metric-status medium">Durchschnitt</span>
+              </div>
+              <div class="soil-metric">
+                <div class="metric-label">Phosphor (P)</div>
+                <div class="metric-value">8</div>
+                <span class="metric-status good">Optimal</span>
+              </div>
+              <div class="soil-metric">
+                <div class="metric-label">Kalium (K)</div>
+                <div class="metric-value">18</div>
+                <span class="metric-status good">Optimal</span>
+              </div>
+            </div>
+            <div class="soil-recommendation">
+              <strong>Empfehlung:</strong> Leichte Stickstoffdüngung in 2 Wochen durchführen.
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Felder Management -->
+      <section id="fields" class="content-section hidden">
+        <h2><i class="fas fa-tractor"></i> Felder Management</h2>
+        <p class="subtitle">Verwalten Sie Ihre Felder, Kulturen und Bewirtschaftungspläne</p>
+        
+        <div class="field-management">
+          <div class="field-overview">
+            <div class="header-row">
+              <h3><i class="fas fa-list"></i> Feldübersicht</h3>
+              <button id="add-field-btn" class="btn-login">
+                <i class="fas fa-plus"></i> Neues Feld anlegen
+              </button>
+            </div>
+            
+            <table class="field-table">
+              <thead>
+                <tr>
+                  <th>Feldname</th>
+                  <th>Größe (ha)</th>
+                  <th>Aktuelle Kultur</th>
+                  <th>Status</th>
+                  <th>Aktionen</th>
+                </tr>
+              </thead>
+              <tbody id="fields-table-body">
+                <tr>
+                  <td>Nordfeld</td>
+                  <td>42.5</td>
+                  <td>Weizen</td>
+                  <td><span class="metric-status good">Wachstum</span></td>
+                  <td>
+                    <div class="field-actions">
+                      <button class="action-btn view-btn">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="action-btn delete-btn-table">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Südfeld</td>
+                  <td>38.2</td>
+                  <td>Mais</td>
+                  <td><span class="metric-status medium">Bewässerung nötig</span></td>
+                  <td>
+                    <div class="field-actions">
+                      <button class="action-btn view-btn">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="action-btn delete-btn-table">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Westwiese</td>
+                  <td>22.8</td>
+                  <td>Raps</td>
+                  <td><span class="metric-status good">Erntebereit</span></td>
+                  <td>
+                    <div class="field-actions">
+                      <button class="action-btn view-btn">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="action-btn delete-btn-table">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Ostfeld</td>
+                  <td>18.5</td>
+                  <td>Gerste</td>
+                  <td><span class="metric-status poor">Schädlingsbefall</span></td>
+                  <td>
+                    <div class="field-actions">
+                      <button class="action-btn view-btn">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="action-btn delete-btn-table">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="field-map">
+            <h3><i class="fas fa-map"></i> Feldkarte</h3>
+            <div id="field-map-container">
+              <!-- Karte wird dynamisch geladen -->
+            </div>
+            <div class="map-tools">
+              <button id="draw-polygon" class="map-tool-btn">
+                <i class="fas fa-draw-polygon"></i> Feld zeichnen
+              </button>
+              <button id="delete-polygon" class="map-tool-btn">
+                <i class="fas fa-trash"></i> Letztes Feld löschen
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="field-detail">
+          <h3><i class="fas fa-info-circle"></i> Felddetails: Nordfeld</h3>
+          <div class="detail-grid">
+            <div>
+              <div class="detail-section">
+                <h4><i class="fas fa-info"></i> Grundinformationen</h4>
+                <div class="detail-row">
+                  <span class="detail-label">Name:</span>
+                  <span class="detail-value">Nordfeld</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Größe:</span>
+                  <span class="detail-value">42.5 ha</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Bodenart:</span>
+                  <span class="detail-value">Lehmiger Sand</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Hangneigung:</span>
+                  <span class="detail-value">2-5%</span>
+                </div>
+              </div>
+              
+              <div class="detail-section">
+                <h4><i class="fas fa-seedling"></i> Aktuelle Kultur</h4>
+                <div class="detail-row">
+                  <span class="detail-label">Kulturart:</span>
+                  <span class="detail-value">Weizen (Winterweizen)</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Pflanzdatum:</span>
+                  <span class="detail-value">15. Oktober 2024</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Ernte geplant:</span>
+                  <span class="detail-value">25. Juli 2025</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Erwarteter Ertrag:</span>
+                  <span class="detail-value">8.2 t/ha</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="detail-section">
+                <h4><i class="fas fa-history"></i> Anbauhistorie</h4>
+                <div class="history-chart">
+                  <div class="chart-bar" style="height: 70%">
+                    <div class="chart-label">2024<br>Weizen</div>
+                  </div>
+                  <div class="chart-bar" style="height: 85%">
+                    <div class="chart-label">2023<br>Raps</div>
+                  </div>
+                  <div class="chart-bar" style="height: 65%">
+                    <div class="chart-label">2022<br>Gerste</div>
+                  </div>
+                  <div class="chart-bar" style="height: 78%">
+                    <div class="chart-label">2021<br>Weizen</div>
+                  </div>
+                  <div class="chart-bar" style="height: 72%">
+                    <div class="chart-label">2020<br>Hafer</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="detail-section">
+                <h4><i class="fas fa-flask"></i> Bodenanalyse</h4>
+                <div class="detail-row">
+                  <span class="detail-label">pH-Wert:</span>
+                  <span class="detail-value">6.8 (Optimal)</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Stickstoff (N):</span>
+                  <span class="detail-value">14 mg/kg (Durchschnitt)</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Phosphor (P):</span>
+                  <span class="detail-value">8 mg/kg (Optimal)</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Kalium (K):</span>
+                  <span class="detail-value">18 mg/kg (Optimal)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- KI-Assistent -->
+      <section id="ai" class="content-section hidden">
+        <h2><i class="fas fa-robot"></i> KI-Assistent</h2>
+        <p class="subtitle">Erhalten Sie intelligente Empfehlungen für Ihren Betrieb</p>
+        
+        <div class="ai-container">
+          <div class="ai-header">
+            <h2><i class="fas fa-robot"></i> AgriSmart KI-Assistent</h2>
+            <p>Stellen Sie Fragen zu Erntezeiten, Düngung, Bewässerung oder Schädlingsbekämpfung</p>
+          </div>
+          
+          <div class="ai-chat-container">
+            <div class="ai-chat-messages">
+              <!-- Nachrichten werden hier dynamisch eingefügt -->
+              <div class="message ai-message">
+                <div class="message-avatar">
+                  <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                  <div class="message-sender">AgriSmart KI</div>
+                  <div class="message-text">
+                    Hallo Max! Ich bin dein AgriSmart KI-Assistent. 
+                    Wie kann ich dir heute helfen? Du kannst mich zu Themen wie Erntezeitpunkten, 
+                    Düngemitteln, Bewässerung oder Schädlingsbekämpfung befragen.
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="ai-chat-input">
+              <input type="text" id="ai-question" placeholder="Stellen Sie eine Frage...">
+              <button id="ai-send-btn">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="ai-tools">
+            <h3><i class="fas fa-tools"></i> KI-Tools</h3>
+            <div class="tool-cards">
+              <div class="tool-card">
+                <i class="fas fa-calendar-alt"></i>
+                <h4>Ernteplaner</h4>
+                <p>Optimale Erntezeitpunkte berechnen</p>
+              </div>
+              <div class="tool-card">
+                <i class="fas fa-tint"></i>
+                <h4>Bewässerungsplan</h4>
+                <p>Effiziente Bewässerungsstrategien</p>
+              </div>
+              <div class="tool-card">
+                <i class="fas fa-pills"></i>
+                <h4>Düngerrechner</h4>
+                <p>Präzise Düngemittelberechnung</p>
+              </div>
+              <div class="tool-card">
+                <i class="fas fa-bug"></i>
+                <h4>Schädlingserkennung</h4>
+                <p>Früherkennung von Schädlingsbefall</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Mein Betrieb -->
+      <section id="my-farm" class="content-section hidden">
+        <h2><i class="fas fa-home"></i> Mein Betrieb</h2>
+        <p class="subtitle">Verwalten Sie Ihre Betriebsdaten und Ressourcen</p>
+        
+        <div class="farm-tabs">
+          <button class="tab-btn active" data-tab="farm-details">
+            <i class="fas fa-info-circle"></i> Betriebsdaten
+          </button>
+          <button class="tab-btn" data-tab="farm-fields">
+            <i class="fas fa-tractor"></i> Felder
+          </button>
+          <button class="tab-btn" data-tab="farm-machinery">
+            <i class="fas fa-cogs"></i> Maschinen
+          </button>
+          <button class="tab-btn" data-tab="farm-personnel">
+            <i class="fas fa-users"></i> Personal
+          </button>
+        </div>
+        
+        <!-- Betriebsdaten -->
+        <div id="farm-details" class="tab-content active">
+          <div class="farm-dashboard">
+            <div class="farm-card">
+              <h3><i class="fas fa-chart-line"></i> Betriebsstatistiken</h3>
+              <div class="farm-stats">
+                <div class="farm-stat">
+                  <div class="stat-value">125.5</div>
+                  <div class="stat-label">Gesamtfläche (ha)</div>
+                </div>
+                <div class="farm-stat">
+                  <div class="stat-value">4</div>
+                  <div class="stat-label">Aktive Felder</div>
+                </div>
+                <div class="farm-stat">
+                  <div class="stat-value">8</div>
+                  <div class="stat-label">Maschinen</div>
+                </div>
+                <div class="farm-stat">
+                  <div class="stat-value">5</div>
+                  <div class="stat-label">Mitarbeiter</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="farm-card">
+              <h3><i class="fas fa-info-circle"></i> Betriebsinformationen</h3>
+              <form id="farm-details-form" class="farm-data-form">
+                <div class="farm-form-group">
+                  <h4><i class="fas fa-home"></i> Allgemeine Informationen</h4>
+                  <div class="input-group">
+                    <label for="farm-name">Betriebsname</label>
+                    <input type="text" id="farm-name" value="Musterhof GmbH">
+                  </div>
+                  <div class="input-group">
+                    <label for="farm-size">Gesamtfläche (ha)</label>
+                    <input type="number" id="farm-size" value="125.5">
+                  </div>
+                  <div class="input-group">
+                    <label for="farm-type">Betriebsart</label>
+                    <select id="farm-type">
+                      <option value="crop">Ackerbau</option>
+                      <option value="livestock">Viehwirtschaft</option>
+                      <option value="mixed">Gemischter Betrieb</option>
+                      <option value="organic">Bio-Landwirtschaft</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="farm-form-group">
+                  <h4><i class="fas fa-map-marker-alt"></i> Adresse</h4>
+                  <div class="input-group">
+                    <label for="farm-address">Straße und Hausnummer</label>
+                    <input type="text" id="farm-address" value="Musterstraße 123">
+                  </div>
+                  <div class="input-group">
+                    <label for="farm-plz">PLZ</label>
+                    <input type="text" id="farm-plz" value="12345">
+                  </div>
+                  <div class="input-group">
+                    <label for="farm-city">Ort</label>
+                    <input type="text" id="farm-city" value="Musterstadt">
+                  </div>
+                </div>
+                
+                <div class="farm-form-group">
+                  <h4><i class="fas fa-file-alt"></i> Beschreibung</h4>
+                  <textarea id="farm-description">Familienbetrieb seit 1950, spezialisiert auf Getreideanbau und nachhaltige Landwirtschaft.</textarea>
+                </div>
+                
+                <button type="submit" class="btn-login">
+                  <i class="fas fa-save"></i> Betriebsdaten speichern
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Felder -->
+        <div id="farm-fields" class="tab-content">
+          <div class="farm-card">
+            <h3><i class="fas fa-tractor"></i> Felder verwalten</h3>
+            <form id="add-field-form" class="farm-data-form">
+              <div class="farm-form-group">
+                <h4><i class="fas fa-plus-circle"></i> Neues Feld hinzufügen</h4>
+                <div class="input-group">
+                  <label for="field-name">Feldname</label>
+                  <input type="text" id="field-name" placeholder="Nordfeld">
+                </div>
+                <div class="input-group">
+                  <label for="field-size">Größe (ha)</label>
+                  <input type="number" id="field-size" placeholder="42.5">
+                </div>
+                <div class="input-group">
+                  <label for="crop-type">Aktuelle Kultur</label>
+                  <select id="crop-type">
+                    <option value="wheat">Weizen</option>
+                    <option value="corn">Mais</option>
+                    <option value="rape">Raps</option>
+                    <option value="barley">Gerste</option>
+                    <option value="oats">Hafer</option>
+                    <option value="potatoes">Kartoffeln</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label for="planting-date">Pflanzdatum</label>
+                  <input type="date" id="planting-date">
+                </div>
+              </div>
+              
+              <div class="farm-form-group">
+                <h4><i class="fas fa-sticky-note"></i> Notizen</h4>
+                <textarea id="field-notes" placeholder="Besonderheiten oder Hinweise zu diesem Feld..."></textarea>
+              </div>
+              
+              <button type="submit" class="btn-login">
+                <i class="fas fa-plus"></i> Feld hinzufügen
+              </button>
+            </form>
+          </div>
+          
+          <div class="farm-card">
+            <h3><i class="fas fa-list"></i> Meine Felder</h3>
+            <div class="farm-list" id="fields-container">
+              <!-- Felder werden hier dynamisch eingefügt -->
+              <div class="farm-item-card">
+                <div class="farm-item-header">
+                  <div class="farm-item-name">Nordfeld</div>
+                </div>
+                <div class="farm-item-details">
+                  <div><strong>Größe:</strong> 42.5 ha</div>
+                  <div><strong>Kultur:</strong> Weizen</div>
+                  <div><strong>Pflanzdatum:</strong> 15.10.2024</div>
+                  <div><strong>Notizen:</strong> Lehmiger Sandboden</div>
+                </div>
+                <button class="delete-btn">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              
+              <div class="farm-item-card">
+                <div class="farm-item-header">
+                  <div class="farm-item-name">Südfeld</div>
+                </div>
+                <div class="farm-item-details">
+                  <div><strong>Größe:</strong> 38.2 ha</div>
+                  <div><strong>Kultur:</strong> Mais</div>
+                  <div><strong>Pflanzdatum:</strong> 20.05.2024</div>
+                  <div><strong>Notizen:</strong> Zusatzbewässerung erforderlich</div>
+                </div>
+                <button class="delete-btn">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Maschinen -->
+        <div id="farm-machinery" class="tab-content">
+          <div class="farm-card">
+            <h3><i class="fas fa-cogs"></i> Maschinen verwalten</h3>
+            <form id="add-machinery-form" class="farm-data-form">
+              <div class="farm-form-group">
+                <h4><i class="fas fa-plus-circle"></i> Neue Maschine hinzufügen</h4>
+                <div class="input-group">
+                  <label for="machine-type">Maschinentyp</label>
+                  <select id="machine-type">
+                    <option value="tractor">Traktor</option>
+                    <option value="harvester">Mähdrescher</option>
+                    <option value="sprayer">Spritze</option>
+                    <option value="plow">Pflug</option>
+                    <option value="seeder">Sämaschine</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label for="machine-brand">Hersteller</label>
+                  <input type="text" id="machine-brand" placeholder="John Deere">
+                </div>
+                <div class="input-group">
+                  <label for="machine-model">Modell</label>
+                  <input type="text" id="machine-model" placeholder="Model XYZ">
+                </div>
+                <div class="input-group">
+                  <label for="machine-year">Baujahr</label>
+                  <input type="number" id="machine-year" placeholder="2020">
+                </div>
+              </div>
+              
+              <div class="farm-form-group">
+                <h4><i class="fas fa-tools"></i> Technische Daten</h4>
+                <textarea id="machine-specs" placeholder="Leistung, Besonderheiten, Ausstattung..."></textarea>
+              </div>
+              
+              <button type="submit" class="btn-login">
+                <i class="fas fa-plus"></i> Maschine hinzufügen
+              </button>
+            </form>
+          </div>
+          
+          <div class="farm-card">
+            <h3><i class="fas fa-list"></i> Maschinenpark</h3>
+            <div class="farm-list" id="machinery-container">
+              <!-- Maschinen werden hier dynamisch eingefügt -->
+              <div class="farm-item-card">
+                <div class="farm-item-header">
+                  <div class="farm-item-name">John Deere 6250R</div>
+                </div>
+                <div class="farm-item-details">
+                  <div><strong>Typ:</strong> Traktor</div>
+                  <div><strong>Baujahr:</strong> 2020</div>
+                  <div><strong>Leistung:</strong> 250 PS</div>
+                  <div><strong>Besonderheiten:</strong> GPS-Steuerung, Frontlader</div>
+                </div>
+                <button class="delete-btn">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              
+              <div class="farm-item-card">
+                <div class="farm-item-header">
+                  <div class="farm-item-name">Claas Lexion 770</div>
+                </div>
+                <div class="farm-item-details">
+                  <div><strong>Typ:</strong> Mähdrescher</div>
+                  <div><strong>Baujahr:</strong> 2019</div>
+                  <div><strong>Leistung:</strong> 400 PS</div>
+                  <div><strong>Besonderheiten:</strong> 9m Schneidwerk, Getreidetank 12.000l</div>
+                </div>
+                <button class="delete-btn">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Personal -->
+        <div id="farm-personnel" class="tab-content">
+          <div class="farm-card">
+            <h3><i class="fas fa-users"></i> Personal verwalten</h3>
+            <form id="add-personnel-form" class="farm-data-form">
+              <div class="farm-form-group">
+                <h4><i class="fas fa-user-plus"></i> Neuen Mitarbeiter hinzufügen</h4>
+                <div class="input-group">
+                  <label for="person-name">Name</label>
+                  <input type="text" id="person-name" placeholder="Max Mustermann">
+                </div>
+                <div class="input-group">
+                  <label for="person-role">Position</label>
+                  <select id="person-role">
+                    <option value="farmer">Landwirt</option>
+                    <option value="manager">Betriebsleiter</option>
+                    <option value="mechanic">Mechaniker</option>
+                    <option value="seasonal">Saisonarbeiter</option>
+                    <option value="admin">Verwaltung</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label for="person-email">E-Mail</label>
+                  <input type="email" id="person-email" placeholder="max@mustermann.de">
+                </div>
+                <div class="input-group">
+                  <label for="person-phone">Telefon</label>
+                  <input type="tel" id="person-phone" placeholder="0123 456789">
+                </div>
+              </div>
+              
+              <div class="farm-form-group">
+                <h4><i class="fas fa-tasks"></i> Verantwortlichkeiten</h4>
+                <textarea id="person-responsibilities" placeholder="Aufgaben und Verantwortungsbereiche..."></textarea>
+              </div>
+              
+              <button type="submit" class="btn-login">
+                <i class="fas fa-plus"></i> Mitarbeiter hinzufügen
+              </button>
+            </form>
+          </div>
+          
+          <div class="farm-card">
+            <h3><i class="fas fa-address-book"></i> Mitarbeiterliste</h3>
+            <div class="farm-list" id="personnel-container">
+              <!-- Personal wird hier dynamisch eingefügt -->
+              <div class="farm-item-card">
+                <div class="farm-item-header">
+                  <div class="farm-item-name">Max Mustermann</div>
+                </div>
+                <div class="farm-item-details">
+                  <div><strong>Position:</strong> Betriebsleiter</div>
+                  <div><strong>Telefon:</strong> 0123 456789</div>
+                  <div><strong>E-Mail:</strong> max@mustermann.de</div>
+                  <div><strong>Verantwortlichkeiten:</strong> Gesamtleitung, Planung, Finanzen</div>
+                </div>
+                <button class="delete-btn">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              
+              <div class="farm-item-card">
+                <div class="farm-item-header">
+                  <div class="farm-item-name">Erika Musterfrau</div>
+                </div>
+                <div class="farm-item-details">
+                  <div><strong>Position:</strong> Landwirt</div>
+                  <div><strong>Telefon:</strong> 0987 654321</div>
+                  <div><strong>E-Mail:</strong> erika@musterfrau.de</div>
+                  <div><strong>Verantwortlichkeiten:</strong> Feldbewirtschaftung, Ernteplanung</div>
+                </div>
+                <button class="delete-btn">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-brand">
+            <div class="logo">
+              <i class="fas fa-tractor"></i>
+              <span>AgriSmart</span>
+            </div>
+            <p>Intelligente Lösungen für moderne Landwirtschaft</p>
+          </div>
+          
+          <div class="link-group">
+            <h4>Entdecken</h4>
+            <a href="#"><i class="fas fa-home"></i> Startseite</a>
+            <a href="#"><i class="fas fa-tractor"></i> Felder</a>
+            <a href="#"><i class="fas fa-seedling"></i> Kulturen</a>
+            <a href="#"><i class="fas fa-robot"></i> KI-Assistent</a>
+          </div>
+          
+          <div class="link-group">
+            <h4>Ressourcen</h4>
+            <a href="#"><i class="fas fa-book"></i> Dokumentation</a>
+            <a href="#"><i class="fas fa-video"></i> Tutorials</a>
+            <a href="#"><i class="fas fa-chart-line"></i> Marktanalysen</a>
+            <a href="#"><i class="fas fa-cloud-sun"></i> Wetterdaten</a>
+          </div>
+          
+          <div class="link-group">
+            <h4>Unternehmen</h4>
+            <a href="#"><i class="fas fa-info-circle"></i> Über uns</a>
+            <a href="#"><i class="fas fa-bullhorn"></i> Neuigkeiten</a>
+            <a href="#"><i class="fas fa-briefcase"></i> Karriere</a>
+            <a href="#"><i class="fas fa-handshake"></i> Partner</a>
+          </div>
+          
+          <div class="link-group">
+            <h4>Support</h4>
+            <a href="#"><i class="fas fa-question-circle"></i> Hilfe-Center</a>
+            <a href="#"><i class="fas fa-comments"></i> Community</a>
+            <a href="#"><i class="fas fa-phone-alt"></i> Kontakt</a>
+            <a href="#"><i class="fas fa-bug"></i> Problem melden</a>
+          </div>
+        </div>
+        
+        <div class="footer-bottom">
+          <div>&copy; 2025 AgriSmart GmbH. Alle Rechte vorbehalten.</div>
+          <div class="social-links">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Benachrichtigungen -->
+  <div class="notification-container"></div>
+
+  <!-- Feld-Detail-Modal -->
+  <div id="field-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Felddaten erfassen</h3>
+        <button class="close-modal">&times;</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-field-name">Feldname</label>
+        <input type="text" id="modal-field-name" placeholder="Nordfeld">
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-field-crop">Aktuelle Kultur</label>
+        <select id="modal-field-crop">
+          <option value="wheat">Weizen</option>
+          <option value="corn">Mais</option>
+          <option value="rape">Raps</option>
+          <option value="barley">Gerste</option>
+          <option value="oats">Hafer</option>
+          <option value="potatoes">Kartoffeln</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-field-notes">Notizen</label>
+        <textarea id="modal-field-notes" placeholder="Besonderheiten oder Hinweise zu diesem Feld..."></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Größe: <span id="modal-field-size">0</span> ha</label>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn btn-secondary close-modal">Abbrechen</button>
+        <button id="confirm-field" class="btn btn-primary">Feld speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <script>
+    // Simulierte Benutzerdaten
+    const currentUser = {
+      id: 1,
+      name: "Max Mustermann",
+      email: "max@mustermann.de",
+      farm: "Musterhof GmbH",
+      plz: "12345",
+      location: "Musterstadt"
+    };
+
+    // DOM-Elemente
+    const appContainer = document.getElementById('app-container');
+    const usernameElement = document.getElementById('username');
+    const navLinks = document.querySelectorAll('nav a');
+    const aiChatMessages = document.querySelector('.ai-chat-messages');
+    const aiSendBtn = document.getElementById('ai-send-btn');
+    const aiQuestion = document.getElementById('ai-question');
+    const addFieldBtn = document.getElementById('add-field-btn');
+    const fieldsTableBody = document.getElementById('fields-table-body');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const farmDetailsForm = document.getElementById('farm-details-form');
+    const addFieldForm = document.getElementById('add-field-form');
+    const addMachineryForm = document.getElementById('add-machinery-form');
+    const addPersonnelForm = document.getElementById('add-personnel-form');
+    const fieldsContainer = document.getElementById('fields-container');
+    const machineryContainer = document.getElementById('machinery-container');
+    const personnelContainer = document.getElementById('personnel-container');
+    const drawPolygonBtn = document.getElementById('draw-polygon');
+    const deletePolygonBtn = document.getElementById('delete-polygon');
+    const fieldModal = document.getElementById('field-modal');
+    const closeModalBtns = document.querySelectorAll('.close-modal');
+    const confirmFieldBtn = document.getElementById('confirm-field');
+    const modalFieldName = document.getElementById('modal-field-name');
+    const modalFieldCrop = document.getElementById('modal-field-crop');
+    const modalFieldNotes = document.getElementById('modal-field-notes');
+    const modalFieldSize = document.getElementById('modal-field-size');
+
+    // Leaflet Variablen
+    let map;
+    let drawnItems;
+    let currentPolygon = null;
+    let currentArea = 0;
+
+    // Initialisierung
+    document.addEventListener('DOMContentLoaded', () => {
+      // Benutzerdaten anzeigen
+      usernameElement.textContent = currentUser.name;
+      
+      // Navigation
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = this.getAttribute('href').substring(1);
+          showSection(target);
+          
+          // Feldkarte initialisieren, wenn Felderbereich geöffnet wird
+          if (target === 'fields') {
+            initFieldMap();
+          }
+        });
+      });
+      
+      // KI-Assistent Event Listener
+      if (aiSendBtn && aiQuestion) {
+        aiSendBtn.addEventListener('click', sendAIMessage);
+        aiQuestion.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            sendAIMessage();
+          }
+        });
+      }
+      
+      // Betriebsdaten Event Listener
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabId = btn.getAttribute('data-tab');
+          
+          // Tabs deaktivieren
+          tabBtns.forEach(b => b.classList.remove('active'));
+          tabContents.forEach(c => c.classList.remove('active'));
+          
+          // Aktiven Tab aktivieren
+          btn.classList.add('active');
+          document.getElementById(tabId).classList.add('active');
+        });
+      });
+      
+      if (farmDetailsForm) {
+        farmDetailsForm.addEventListener('submit', saveFarmDetails);
+      }
+      
+      if (addFieldForm) {
+        addFieldForm.addEventListener('submit', addField);
+      }
+      
+      if (addMachineryForm) {
+        addMachineryForm.addEventListener('submit', addMachinery);
+      }
+      
+      if (addPersonnelForm) {
+        addPersonnelForm.addEventListener('submit', addPersonnel);
+      }
+      
+      // Feldmanagement Event Listener
+      if (addFieldBtn) {
+        addFieldBtn.addEventListener('click', () => {
+          showSection('my-farm');
+          document.querySelector('[data-tab="farm-fields"]').click();
+        });
+      }
+      
+      // Kartenwerkzeuge
+      if (drawPolygonBtn) {
+        drawPolygonBtn.addEventListener('click', () => {
+          if (map) {
+            // Zeichenmodus aktivieren
+            new L.Draw.Polygon(map).enable();
+          }
+        });
+      }
+      
+      if (deletePolygonBtn) {
+        deletePolygonBtn.addEventListener('click', () => {
+          if (currentPolygon) {
+            map.removeLayer(currentPolygon);
+            currentPolygon = null;
+          }
+        });
+      }
+      
+      // Modal Event Listener
+      closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          fieldModal.style.display = 'none';
+        });
+      });
+      
+      if (confirmFieldBtn) {
+        confirmFieldBtn.addEventListener('click', saveFieldFromModal);
+      }
+      
+      // Gespeicherte Daten laden
+      loadFarmData();
+      loadFields();
+      loadMachinery();
+      loadPersonnel();
+      
+      // Direkt die App anzeigen
+      showApp();
+    });
+
+    // App anzeigen
+    function showApp() {
+      appContainer.classList.remove('hidden');
+      
+      // Dashboard als Standard anzeigen
+      showSection('dashboard');
+    }
+
+    // Abschnitt anzeigen
+    function showSection(sectionId) {
+      // Alle Abschnitte ausblenden
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Gewünschten Abschnitt anzeigen
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.classList.remove('hidden');
+      }
+      
+      // Navigation aktualisieren
+      navLinks.forEach(link => {
+        link.parentElement.classList.remove('active');
+        if (link.getAttribute('href') === `#${sectionId}`) {
+          link.parentElement.classList.add('active');
+        }
+      });
+    }
+
+    // Feldkarte initialisieren (mit OpenStreetMap)
+    function initFieldMap() {
+      const mapContainer = document.getElementById('field-map-container');
+      if (!mapContainer || map) return;
+      
+      // Karte initialisieren (Deutschland-Zentrum)
+      map = L.map('field-map-container').setView([51.1657, 10.4515], 6);
+      
+      // OpenStreetMap Layer hinzufügen
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+      
+      // FeatureGroup für gezeichnete Elemente
+      drawnItems = new L.FeatureGroup();
+      map.addLayer(drawnItems);
+      
+      // Zeichensteuerung
+      const drawControl = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+          polygon: {
+            shapeOptions: {
+              color: '#4CAF50',
+              fillColor: '#4CAF50',
+              fillOpacity: 0.3
+            }
+          },
+          polyline: false,
+          rectangle: false,
+          circle: false,
+          circlemarker: false,
+          marker: false
+        },
+        edit: {
+          featureGroup: drawnItems
+        }
+      });
+      
+      map.addControl(drawControl);
+      
+      // Event-Handler für gezeichnete Polygone
+      map.on(L.Draw.Event.CREATED, (e) => {
+        const layer = e.layer;
+        currentPolygon = layer;
+        
+        // Fläche berechnen (in Hektar)
+        currentArea = (L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 10000
+        modalFieldSize.textContent = currentArea.toFixed(2);
+        
+        // Modal öffnen
+        fieldModal.style.display = 'block';
+        
+        // Polygon zur Karte hinzufügen
+        drawnItems.addLayer(layer);
+      });
+      
+      // Gespeicherte Felder laden und anzeigen
+      loadFieldsOnMap();
+    }
+
+    // Gespeicherte Felder auf Karte anzeigen
+    function loadFieldsOnMap() {
+      const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+      
+      fields.forEach(field => {
+        if (field.coordinates) {
+          const polygon = L.polygon(field.coordinates, {
+            color: '#4CAF50',
+            fillColor: '#4CAF50',
+            fillOpacity: 0.3
+          });
+          
+          polygon.bindPopup(`
+            <b>${field.name}</b><br>
+            Größe: ${field.size} ha<br>
+            Kultur: ${getCropName(field.crop)}<br>
+            ${field.notes ? `Notizen: ${field.notes}` : ''}
+          `);
+          
+          polygon.addTo(map);
+          drawnItems.addLayer(polygon);
+        }
+      });
+    }
+
+    // Feld aus Modal speichern
+    function saveFieldFromModal() {
+      if (!currentPolygon || !modalFieldName.value) {
+        showNotification('Bitte geben Sie einen Feldnamen ein und zeichnen Sie ein Feld', 'error');
+        return;
+      }
+      
+      const fieldData = {
+        name: modalFieldName.value,
+        crop: modalFieldCrop.value,
+        notes: modalFieldNotes.value,
+        size: currentArea.toFixed(2),
+        coordinates: currentPolygon.getLatLngs()[0].map(ll => [ll.lat, ll.lng]),
+        id: Date.now().toString()
+      };
+      
+      // Felder aus localStorage laden oder leeres Array erstellen
+      const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+      fields.push(fieldData);
+      localStorage.setItem('agriFields', JSON.stringify(fields));
+      
+      // Modal schließen und zurücksetzen
+      fieldModal.style.display = 'none';
+      modalFieldName.value = '';
+      modalFieldNotes.value = '';
+      currentPolygon = null;
+      
+      // Felder neu laden
+      loadFields();
+      
+      showNotification('Feld erfolgreich gespeichert!', 'success');
+    }
+
+    // KI-Nachricht senden
+    function sendAIMessage() {
+      const question = aiQuestion.value.trim();
+      if (!question) return;
+      
+      // Benutzernachricht hinzufügen
+      addUserMessage(question);
+      
+      // Eingabefeld leeren
+      aiQuestion.value = '';
+      
+      // KI-Antwort simulieren (mit Verzögerung)
+      setTimeout(() => {
+        const aiResponse = generateAIResponse(question);
+        addAIMessage(aiResponse);
+      }, 1000);
+    }
+
+    // Benutzernachricht hinzufügen
+    function addUserMessage(text) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', 'user');
+      
+      messageElement.innerHTML = `
+        <div class="message-content">
+          <div class="message-sender">${currentUser.name.split(' ')[0]}</div>
+          <div class="message-text user-message">${text}</div>
+        </div>
+        <div class="message-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+      `;
+      
+      aiChatMessages.appendChild(messageElement);
+      scrollToBottom();
+    }
+
+    // KI-Nachricht hinzufügen
+    function addAIMessage(text) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', 'ai-message');
+      
+      messageElement.innerHTML = `
+        <div class="message-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="message-content">
+          <div class="message-sender">AgriSmart KI</div>
+          <div class="message-text">${text}</div>
+        </div>
+      `;
+      
+      aiChatMessages.appendChild(messageElement);
+      scrollToBottom();
+    }
+
+    // KI-Antwort generieren
+    function generateAIResponse(question) {
+      const lowerQuestion = question.toLowerCase();
+      
+      if (lowerQuestion.includes('wetter') || lowerQuestion.includes('prognose')) {
+        return "Die Wettervorhersage für die nächsten 7 Tage zeigt sonniges Wetter mit gelegentlichen Schauern. Die Temperaturen liegen zwischen 18°C und 25°C. Für dein Nordfeld empfehle ich Bewässerung am frühen Morgen.";
+      }
+      
+      if (lowerQuestion.includes('ernte') || lowerQuestion.includes('weizen')) {
+        return "Basierend auf der aktuellen Wachstumsphase und Wettervorhersage empfehle ich, die Weizenernte in etwa 10 Tagen durchzuführen. Der optimale Feuchtigkeitsgehalt liegt bei 14-15%.";
+      }
+      
+      if (lowerQuestion.includes('düng') || lowerQuestion.includes('stickstoff')) {
+        return "Die Bodenanalyse zeigt einen Stickstoffmangel. Ich empfehle 30kg/ha Ammoniumnitrat in den nächsten 5 Tagen auszubringen. Achte auf die Wettervorhersage, um Regen zu nutzen.";
+      }
+      
+      if (lowerQuestion.includes('krankheit') || lowerQuestion.includes('mehltau')) {
+        return "Die Symptome deuten auf Mehltau hin. Eine Behandlung mit Fungizid X in einer Dosierung von 2l/ha wird empfohlen. Anwendung am frühen Morgen bei trockenen Bedingungen.";
+      }
+      
+      if (lowerQuestion.includes('bewässerung') || lowerQuestion.includes('wasser')) {
+        return "Aufgrund der geringen Niederschläge und hohen Temperaturen empfehle ich eine zusätzliche Bewässerung von 20mm in dieser Woche. Ideal wäre eine Tröpfchenbewässerung für dein Maisfeld.";
+      }
+      
+      if (lowerQuestion.includes('rap')) {
+        return "Dein Raps auf der Westwiese ist in 5-7 Tagen erntebereit. Der Ölgehalt ist optimal bei der derzeitigen Witterung. Plane die Ernte für trockene Tage ein.";
+      }
+      
+      if (lowerQuestion.includes('boden') || lowerQuestion.includes('analyse')) {
+        return "Die letzte Bodenanalyse zeigt: pH-Wert 6.8 (optimal), Stickstoff 14 mg/kg (durchschnittlich), Phosphor 8 mg/kg (gut), Kalium 18 mg/kg (gut). Empfehle leichte Stickstoffdüngung in 2 Wochen.";
+      }
+      
+      if (lowerQuestion.includes('schädling') || lowerQuestion.includes('käfer')) {
+        return "Derzeit besteht ein moderates Risiko für Kartoffelkäfer. Kontrolliere deine Kartoffelfelder regelmäßig. Bei Befall empfehle ich eine Behandlung mit Insektizid Y.";
+      }
+      
+      // Standardantwort
+      return "Vielen Dank für deine Frage. Als AgriSmart KI-Assistent helfe ich dir bei landwirtschaftlichen Entscheidungen. Du kannst mich zu Themen wie Erntezeitpunkten, Düngemitteln, Bewässerung oder Schädlingsbekämpfung befragen. Wie kann ich dir weiterhelfen?";
+    }
+
+    // Zum Ende des Chats scrollen
+    function scrollToBottom() {
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+    }
+
+    // Betriebsdaten speichern
+    function saveFarmDetails(e) {
+      e.preventDefault();
+      
+      const farmData = {
+        name: document.getElementById('farm-name').value,
+        size: document.getElementById('farm-size').value,
+        address: document.getElementById('farm-address').value,
+        plz: document.getElementById('farm-plz').value,
+        city: document.getElementById('farm-city').value,
+        type: document.getElementById('farm-type').value,
+        description: document.getElementById('farm-description').value
+      };
+      
+      localStorage.setItem('agriFarmData', JSON.stringify(farmData));
+      showNotification('Betriebsdaten erfolgreich gespeichert!', 'success');
+    }
+
+    // Feld hinzufügen (aus Formular)
+    function addField(e) {
+      e.preventDefault();
+      
+      const fieldData = {
+        name: document.getElementById('field-name').value,
+        size: document.getElementById('field-size').value,
+        crop: document.getElementById('crop-type').value,
+        plantingDate: document.getElementById('planting-date').value,
+        notes: document.getElementById('field-notes').value,
+        id: Date.now().toString()
+      };
+      
+      // Felder aus localStorage laden oder leeres Array erstellen
+      const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+      fields.push(fieldData);
+      localStorage.setItem('agriFields', JSON.stringify(fields));
+      
+      // Formular zurücksetzen
+      addFieldForm.reset();
+      
+      // Felder neu laden
+      loadFields();
+      
+      showNotification('Feld erfolgreich hinzugefügt!', 'success');
+    }
+
+    // Maschine hinzufügen
+    function addMachinery(e) {
+      e.preventDefault();
+      
+      const machineryData = {
+        type: document.getElementById('machine-type').value,
+        brand: document.getElementById('machine-brand').value,
+        model: document.getElementById('machine-model').value,
+        year: document.getElementById('machine-year').value,
+        specs: document.getElementById('machine-specs').value,
+        id: Date.now().toString()
+      };
+      
+      const machinery = JSON.parse(localStorage.getItem('agriMachinery')) || [];
+      machinery.push(machineryData);
+      localStorage.setItem('agriMachinery', JSON.stringify(machinery));
+      
+      addMachineryForm.reset();
+      loadMachinery();
+      showNotification('Maschine erfolgreich hinzugefügt!', 'success');
+    }
+
+    // Personal hinzufügen
+    function addPersonnel(e) {
+      e.preventDefault();
+      
+      const personnelData = {
+        name: document.getElementById('person-name').value,
+        role: document.getElementById('person-role').value,
+        email: document.getElementById('person-email').value,
+        phone: document.getElementById('person-phone').value,
+        responsibilities: document.getElementById('person-responsibilities').value,
+        id: Date.now().toString()
+      };
+      
+      const personnel = JSON.parse(localStorage.getItem('agriPersonnel')) || [];
+      personnel.push(personnelData);
+      localStorage.setItem('agriPersonnel', JSON.stringify(personnel));
+      
+      addPersonnelForm.reset();
+      loadPersonnel();
+      showNotification('Person erfolgreich hinzugefügt!', 'success');
+    }
+
+    // Betriebsdaten laden
+    function loadFarmData() {
+      const farmData = JSON.parse(localStorage.getItem('agriFarmData'));
+      if (farmData) {
+        document.getElementById('farm-name').value = farmData.name || '';
+        document.getElementById('farm-size').value = farmData.size || '';
+        document.getElementById('farm-address').value = farmData.address || '';
+        document.getElementById('farm-plz').value = farmData.plz || '';
+        document.getElementById('farm-city').value = farmData.city || '';
+        document.getElementById('farm-type').value = farmData.type || 'crop';
+        document.getElementById('farm-description').value = farmData.description || '';
+      }
+    }
+
+    // Felder laden
+    function loadFields() {
+      const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+      fieldsContainer.innerHTML = '';
+      
+      if (fields.length === 0) {
+        fieldsContainer.innerHTML = '<p class="no-data">Noch keine Felder angelegt</p>';
+        return;
+      }
+      
+      fields.forEach(field => {
+        const fieldElement = document.createElement('div');
+        fieldElement.className = 'farm-item-card';
+        fieldElement.innerHTML = `
+          <div class="farm-item-header">
+            <div class="farm-item-name">${field.name}</div>
+          </div>
+          <div class="farm-item-details">
+            <div><strong>Größe:</strong> ${field.size || '-'} ha</div>
+            <div><strong>Kultur:</strong> ${getCropName(field.crop)}</div>
+            <div><strong>Pflanzdatum:</strong> ${formatDate(field.plantingDate)}</div>
+            ${field.notes ? `<div><strong>Notizen:</strong> ${field.notes}</div>` : ''}
+          </div>
+          <button class="delete-btn" data-id="${field.id}" data-type="field">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        fieldsContainer.appendChild(fieldElement);
+      });
+      
+      // Event-Listener für Löschbuttons hinzufügen
+      document.querySelectorAll('.delete-btn[data-type="field"]').forEach(btn => {
+        btn.addEventListener('click', deleteField);
+      });
+    }
+
+    // Maschinen laden
+    function loadMachinery() {
+      const machinery = JSON.parse(localStorage.getItem('agriMachinery')) || [];
+      machineryContainer.innerHTML = '';
+      
+      if (machinery.length === 0) {
+        machineryContainer.innerHTML = '<p class="no-data">Noch keine Maschinen erfasst</p>';
+        return;
+      }
+      
+      machinery.forEach(machine => {
+        const machineElement = document.createElement('div');
+        machineElement.className = 'farm-item-card';
+        machineElement.innerHTML = `
+          <div class="farm-item-header">
+            <div class="farm-item-name">${machine.brand} ${machine.model}</div>
+          </div>
+          <div class="farm-item-details">
+            <div><strong>Typ:</strong> ${getMachineType(machine.type)}</div>
+            <div><strong>Baujahr:</strong> ${machine.year}</div>
+            <div><strong>Technik:</strong> ${machine.specs || '-'}</div>
+          </div>
+          <button class="delete-btn" data-id="${machine.id}" data-type="machinery">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        machineryContainer.appendChild(machineElement);
+      });
+      
+      document.querySelectorAll('.delete-btn[data-type="machinery"]').forEach(btn => {
+        btn.addEventListener('click', deleteMachinery);
+      });
+    }
+
+    // Personal laden
+    function loadPersonnel() {
+      const personnel = JSON.parse(localStorage.getItem('agriPersonnel')) || [];
+      personnelContainer.innerHTML = '';
+      
+      if (personnel.length === 0) {
+        personnelContainer.innerHTML = '<p class="no-data">Noch kein Personal erfasst</p>';
+        return;
+      }
+      
+      personnel.forEach(person => {
+        const personElement = document.createElement('div');
+        personElement.className = 'farm-item-card';
+        personElement.innerHTML = `
+          <div class="farm-item-header">
+            <div class="farm-item-name">${person.name}</div>
+          </div>
+          <div class="farm-item-details">
+            <div><strong>Position:</strong> ${getPersonRole(person.role)}</div>
+            <div><strong>Telefon:</strong> ${person.phone || '-'}</div>
+            <div><strong>E-Mail:</strong> ${person.email || '-'}</div>
+            <div><strong>Verantwortlichkeiten:</strong> ${person.responsibilities || '-'}</div>
+          </div>
+          <button class="delete-btn" data-id="${person.id}" data-type="personnel">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        personnelContainer.appendChild(personElement);
+      });
+      
+      document.querySelectorAll('.delete-btn[data-type="personnel"]').forEach(btn => {
+        btn.addEventListener('click', deletePersonnel);
+      });
+    }
+
+    // Feld löschen
+    function deleteField() {
+      const id = this.getAttribute('data-id');
+      let fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+      fields = fields.filter(field => field.id !== id);
+      localStorage.setItem('agriFields', JSON.stringify(fields));
+      loadFields();
+      showNotification('Feld erfolgreich gelöscht!', 'success');
+    }
+
+    // Maschine löschen
+    function deleteMachinery() {
+      const id = this.getAttribute('data-id');
+      let machinery = JSON.parse(localStorage.getItem('agriMachinery')) || [];
+      machinery = machinery.filter(machine => machine.id !== id);
+      localStorage.setItem('agriMachinery', JSON.stringify(machinery));
+      loadMachinery();
+      showNotification('Maschine erfolgreich gelöscht!', 'success');
+    }
+
+    // Personal löschen
+    function deletePersonnel() {
+      const id = this.getAttribute('data-id');
+      let personnel = JSON.parse(localStorage.getItem('agriPersonnel')) || [];
+      personnel = personnel.filter(person => person.id !== id);
+      localStorage.setItem('agriPersonnel', JSON.stringify(personnel));
+      loadPersonnel();
+      showNotification('Person erfolgreich gelöscht!', 'success');
+    }
+
+    // Hilfsfunktionen
+    function getCropName(cropCode) {
+      const crops = {
+        'wheat': 'Weizen',
+        'corn': 'Mais',
+        'rape': 'Raps',
+        'barley': 'Gerste',
+        'oats': 'Hafer',
+        'potatoes': 'Kartoffeln'
+      };
+      return crops[cropCode] || cropCode;
+    }
+
+    function getMachineType(typeCode) {
+      const types = {
+        'tractor': 'Traktor',
+        'harvester': 'Mähdrescher',
+        'sprayer': 'Spritze',
+        'plow': 'Pflug',
+        'seeder': 'Sämaschine'
+      };
+      return types[typeCode] || typeCode;
+    }
+
+    function getPersonRole(roleCode) {
+      const roles = {
+        'farmer': 'Landwirt',
+        'manager': 'Betriebsleiter',
+        'mechanic': 'Mechaniker',
+        'seasonal': 'Saisonarbeiter',
+        'admin': 'Verwaltung'
+      };
+      return roles[roleCode] || roleCode;
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('de-DE');
+    }
+
+    // Benachrichtigung anzeigen
+    function showNotification(message, type = 'info') {
+      const container = document.querySelector('.notification-container');
+      if (!container) return;
+      
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+        <div class="notification-content">
+          ${message}
+        </div>
+      `;
+      
+      container.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('show');
+      }, 100);
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+          container.removeChild(notification);
+        }, 300);
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
