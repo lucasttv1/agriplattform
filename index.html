@@ -2122,10 +2122,11 @@
       const duration = (growthTable[crop] && growthTable[crop][soil]) ? growthTable[crop][soil] : 200;
       let plantingDate = field.plantingDate;
       let start;
-      if (!plantingDate) {
+      // Robust für verschiedene Formate und null/leer
+      if (!plantingDate || plantingDate === '' || plantingDate === null) {
         return { percent: 0, daysLeft: duration, error: 'Kein Pflanzdatum gesetzt' };
       }
-      // Robust für verschiedene Formate
+      let start;
       if (typeof plantingDate === 'string') {
         // ISO-Format oder evtl. mit Uhrzeit
         if (/^\d{4}-\d{2}-\d{2}/.test(plantingDate)) {
