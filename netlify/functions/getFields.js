@@ -11,9 +11,13 @@ exports.handler = async function (event, context) {
     await client.connect();
     const result = await client.query('SELECT * FROM fields ORDER BY id');
     await client.end();
+    const fields = result.rows.map(row => ({
+      ...row,
+      coordinates: row.coordinates ? JSON.parse(row.coordinates) : null
+    }));
     return {
       statusCode: 200,
-      body: JSON.stringify({ fields: result.rows })
+      body: JSON.stringify({ fields })
     };
   } catch (error) {
     return {

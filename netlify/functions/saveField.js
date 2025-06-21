@@ -26,8 +26,8 @@ exports.handler = async function(event, context) {
   try {
     await client.connect();
     const result = await client.query(
-      'INSERT INTO fields (name, size, crop, plantingDate, notes, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [name, size, crop, plantingDate, notes, status]
+      'INSERT INTO fields (name, size, crop, plantingDate, notes, status, coordinates) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [name, size, crop, plantingDate, notes, status, JSON.stringify(coordinates)]
     );
     await client.end();
     return {
