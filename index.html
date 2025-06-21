@@ -1354,28 +1354,8 @@
           <!-- Feldstatus -->
           <div class="dashboard-card fields-card">
             <h3><i class="fas fa-tractor"></i> Feldstatus</h3>
-            <div class="fields-list">
-              <div class="field-item">
-                <div class="field-name">Nordfeld (Weizen)</div>
-                <div class="field-progress">
-                  <div class="progress-bar" style="width: 75%; background-color: var(--primary-color);"></div>
-                </div>
-                <div class="field-status">Wachstumsphase: 75% abgeschlossen</div>
-              </div>
-              <div class="field-item">
-                <div class="field-name">Südfeld (Mais)</div>
-                <div class="field-progress">
-                  <div class="progress-bar" style="width: 45%; background-color: var(--warning-color);"></div>
-                </div>
-                <div class="field-status">Bewässerung erforderlich</div>
-              </div>
-              <div class="field-item">
-                <div class="field-name">Westwiese (Raps)</div>
-                <div class="field-progress">
-                  <div class="progress-bar" style="width: 95%; background-color: var(--success-color);"></div>
-                </div>
-                <div class="field-status">Erntebereit in 5-7 Tagen</div>
-              </div>
+            <div class="fields-list" id="dashboard-fields-list">
+              <!-- Echte Felder mit Wachstumsprognose werden hier dynamisch eingefügt -->
             </div>
             <a href="#fields" class="btn-view-all">
               <i class="fas fa-arrow-right"></i> Alle Felder anzeigen
@@ -2082,6 +2062,75 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
   <script src="js/script.js"></script>
+  <script>
+    // Dashboard Feldstatus dynamisch befüllen
+    document.addEventListener('DOMContentLoaded', function() {
+      const dashboardFieldsList = document.getElementById('dashboard-fields-list');
+      if (!dashboardFieldsList) return;
+      fetch('/.netlify/functions/getFields')
+        .then(res => res.json())
+        .then(data => {
+          const fields = data.fields || [];
+          dashboardFieldsList.innerHTML = '';
+          if (fields.length === 0) {
+            dashboardFieldsList.innerHTML = '<div class="no-data">Keine Felder vorhanden.</div>';
+            return;
+          }
+          fields.forEach(field => {
+            const { name, crop, plantingDate, soilType } = field;
+            const { percent, daysLeft } = calcGrowthPercent(field);
+            let color = 'var(--primary-color)';
+            if (percent >= 95) color = 'var(--success-color)';
+            else if (percent < 60) color = 'var(--warning-color)';
+            dashboardFieldsList.innerHTML += `
+              <div class="field-item">
+                <div class="field-name">${name} (${getCropName(crop)})</div>
+                <div class="field-progress">
+                  <div class="progress-bar" style="width: ${percent}%; background-color: ${color};"></div>
+                </div>
+                <div class="field-status">Wachstumsphase: ${percent}% abgeschlossen${daysLeft > 0 ? `, ${daysLeft} Tage bis Ernte` : ', Erntebereit!'}</div>
+              </div>
+            `;
+          });
+        });
+    });
+
+    // Hilfsfunktionen für Prognose
+    function calcGrowthPercent(field) {
+      // Typische Wachstumsdauer in Tagen je Kultur und Bodenart
+      const growthTable = {
+        wheat:    { sand: 250, loamy_sand: 240, sandy_loam: 230, loam: 220, silty_loam: 225, clay_loam: 230, clay: 240, peat: 260 },
+        corn:     { sand: 140, loamy_sand: 135, sandy_loam: 130, loam: 125, silty_loam: 128, clay_loam: 130, clay: 135, peat: 145 },
+        rape:     { sand: 170, loamy_sand: 165, sandy_loam: 160, loam: 155, silty_loam: 158, clay_loam: 160, clay: 165, peat: 175 },
+        barley:   { sand: 120, loamy_sand: 115, sandy_loam: 110, loam: 105, silty_loam: 108, clay_loam: 110, clay: 115, peat: 125 },
+        oats:     { sand: 110, loamy_sand: 105, sandy_loam: 100, loam: 95, silty_loam: 98, clay_loam: 100, clay: 105, peat: 115 },
+        potatoes: { sand: 130, loamy_sand: 125, sandy_loam: 120, loam: 115, silty_loam: 118, clay_loam: 120, clay: 125, peat: 135 }
+      };
+      const crop = field.crop || 'wheat';
+      const soil = field.soilType || 'loam';
+      const duration = (growthTable[crop] && growthTable[crop][soil]) ? growthTable[crop][soil] : 200;
+      const start = new Date(field.plantingDate);
+      const now = new Date();
+      if (isNaN(start.getTime())) return { percent: 0, daysLeft: duration };
+      const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+      let percent = Math.round((diff / duration) * 100);
+      if (percent < 0) percent = 0;
+      if (percent > 100) percent = 100;
+      const daysLeft = Math.max(0, duration - diff);
+      return { percent, daysLeft };
+    }
+    function getCropName(crop) {
+      switch (crop) {
+        case 'wheat': return 'Weizen';
+        case 'corn': return 'Mais';
+        case 'rape': return 'Raps';
+        case 'barley': return 'Gerste';
+        case 'oats': return 'Hafer';
+        case 'potatoes': return 'Kartoffeln';
+        default: return crop;
+      }
+    }
+  </script>
   <script>
     // Simulierte Benutzerdaten
     const currentUser = {
