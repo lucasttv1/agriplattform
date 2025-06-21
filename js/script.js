@@ -422,6 +422,16 @@ async function loadFields() {
         }
         fieldsContainer.appendChild(card);
         });
+        // Edit-Button-Events nach dem Rendern setzen (Fallback für dynamisches HTML)
+        setTimeout(() => {
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.onclick = function() {
+              const id = this.getAttribute('data-id');
+              const field = (fields || []).find(f => String(f.id) === String(id));
+              if (field) openEditFieldModal(field);
+            };
+          });
+        }, 0);
       }
     }
 
