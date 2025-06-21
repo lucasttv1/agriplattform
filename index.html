@@ -2108,20 +2108,19 @@
 
     // Hilfsfunktionen für Prognose
     function calcGrowthPercent(field, nowOverride) {
-      // Typische Wachstumsdauer in Tagen je Kultur und Bodenart
+      // Realistische Wachstumsdauern in Tagen je Kultur und Bodenart
       const growthTable = {
-        wheat:    { sand: 250, loamy_sand: 240, sandy_loam: 230, loam: 220, silty_loam: 225, clay_loam: 230, clay: 240, peat: 260 },
-        corn:     { sand: 140, loamy_sand: 135, sandy_loam: 130, loam: 125, silty_loam: 128, clay_loam: 130, clay: 135, peat: 145 },
-        rape:     { sand: 170, loamy_sand: 165, sandy_loam: 160, loam: 155, silty_loam: 158, clay_loam: 160, clay: 165, peat: 175 },
-        barley:   { sand: 120, loamy_sand: 115, sandy_loam: 110, loam: 105, silty_loam: 108, clay_loam: 110, clay: 115, peat: 125 },
-        oats:     { sand: 110, loamy_sand: 105, sandy_loam: 100, loam: 95, silty_loam: 98, clay_loam: 100, clay: 105, peat: 115 },
-        potatoes: { sand: 130, loamy_sand: 125, sandy_loam: 120, loam: 115, silty_loam: 118, clay_loam: 120, clay: 125, peat: 135 }
+        wheat:    { sand: 270, loamy_sand: 260, sandy_loam: 250, loam: 240, silty_loam: 245, clay_loam: 250, clay: 260, peat: 275 },
+        corn:     { sand: 150, loamy_sand: 145, sandy_loam: 140, loam: 135, silty_loam: 138, clay_loam: 140, clay: 145, peat: 155 },
+        rape:     { sand: 180, loamy_sand: 175, sandy_loam: 170, loam: 165, silty_loam: 168, clay_loam: 170, clay: 175, peat: 185 },
+        barley:   { sand: 130, loamy_sand: 125, sandy_loam: 120, loam: 115, silty_loam: 118, clay_loam: 120, clay: 125, peat: 135 },
+        oats:     { sand: 120, loamy_sand: 115, sandy_loam: 110, loam: 105, silty_loam: 108, clay_loam: 110, clay: 115, peat: 125 },
+        potatoes: { sand: 140, loamy_sand: 135, sandy_loam: 130, loam: 125, silty_loam: 128, clay_loam: 130, clay: 135, peat: 145 }
       };
       const crop = field.crop || 'wheat';
       const soil = field.soilType || 'loam';
-      const duration = (growthTable[crop] && growthTable[crop][soil]) ? growthTable[crop][soil] : 200;
+      const duration = (growthTable[crop] && growthTable[crop][soil]) ? growthTable[crop][soil] : 240;
       let plantingDate = field.plantingDate;
-      let start;
       // Robust für verschiedene Formate und null/leer
       if (!plantingDate || plantingDate === '' || plantingDate === null) {
         return { percent: 0, daysLeft: duration, error: 'Kein Pflanzdatum gesetzt' };
