@@ -1183,9 +1183,11 @@
       display: flex;
       flex-direction: column;
     }
-    .modal-content > .form-group {
+    .modal-form-scroll {
       overflow-y: auto;
       flex: 1 1 auto;
+      min-height: 0;
+      margin-bottom: 10px;
     }
     .modal-actions {
       position: sticky;
@@ -2029,46 +2031,47 @@
         <input type="text" id="modal-field-name" placeholder="Nordfeld">
       </div>
       
-      <div class="form-group">
-        <label for="modal-field-crop">Aktuelle Kultur</label>
-        <select id="modal-field-crop">
-          <option value="wheat">Weizen</option>
-          <option value="corn">Mais</option>
-          <option value="rape">Raps</option>
-          <option value="barley">Gerste</option>
-          <option value="oats">Hafer</option>
-          <option value="potatoes">Kartoffeln</option>
-        </select>
-      </div>
+      <div class="modal-form-scroll">
+        <div class="form-group">
+          <label for="modal-field-crop">Aktuelle Kultur</label>
+          <select id="modal-field-crop">
+            <option value="wheat">Weizen</option>
+            <option value="corn">Mais</option>
+            <option value="rape">Raps</option>
+            <option value="barley">Gerste</option>
+            <option value="oats">Hafer</option>
+            <option value="potatoes">Kartoffeln</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label for="modal-planting-date">Pflanzdatum</label>
-        <input type="date" id="modal-planting-date">
-      </div>
+        <div class="form-group">
+          <label for="modal-planting-date">Pflanzdatum</label>
+          <input type="date" id="modal-planting-date">
+        </div>
 
-      <div class="form-group">
-        <label for="modal-soil-type">Bodenart</label>
-        <select id="modal-soil-type">
-          <option value="sand">Sand</option>
-          <option value="loamy_sand">Sandiger Lehm</option>
-          <option value="sandy_loam">Lehmiger Sand</option>
-          <option value="loam">Lehm</option>
-          <option value="silty_loam">Schluffiger Lehm</option>
-          <option value="clay_loam">Lehmiger Ton</option>
-          <option value="clay">Ton</option>
-          <option value="peat">Torf</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label for="modal-soil-type">Bodenart</label>
+          <select id="modal-soil-type">
+            <option value="sand">Sand</option>
+            <option value="loamy_sand">Sandiger Lehm</option>
+            <option value="sandy_loam">Lehmiger Sand</option>
+            <option value="loam">Lehm</option>
+            <option value="silty_loam">Schluffiger Lehm</option>
+            <option value="clay_loam">Lehmiger Ton</option>
+            <option value="clay">Ton</option>
+            <option value="peat">Torf</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label for="modal-field-notes">Notizen</label>
-        <textarea id="modal-field-notes" placeholder="Besonderheiten oder Hinweise zu diesem Feld..."></textarea>
+        <div class="form-group">
+          <label for="modal-field-notes">Notizen</label>
+          <textarea id="modal-field-notes" placeholder="Besonderheiten oder Hinweise zu diesem Feld..."></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Größe: <span id="modal-field-size">0</span> ha</label>
+        </div>
       </div>
-      
-      <div class="form-group">
-        <label>Größe: <span id="modal-field-size">0</span> ha</label>
-      </div>
-      
       <div class="modal-actions">
         <button class="btn btn-secondary close-modal">Abbrechen</button>
         <button id="confirm-field" class="btn btn-primary">Feld speichern</button>
@@ -2213,13 +2216,25 @@
       
       // Modal Event Listener
       closeModalBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          fieldModal.style.display = 'none';
-        });
+      btn.addEventListener('click', () => {
+      fieldModal.style.display = 'none';
+      document.body.style.overflow = '';
+      });
       });
       
       if (confirmFieldBtn) {
-        confirmFieldBtn.addEventListener('click', saveFieldFromModal);
+      confirmFieldBtn.addEventListener('click', saveFieldFromModal);
+      }
+      // Modal Scroll Lock
+      if (fieldModal) {
+      const observer = new MutationObserver(() => {
+      if (fieldModal.style.display === 'block') {
+      document.body.style.overflow = 'hidden';
+      } else {
+      document.body.style.overflow = '';
+      }
+      });
+      observer.observe(fieldModal, { attributes: true, attributeFilter: ['style'] });
       }
       
       // Gespeicherte Daten laden
