@@ -1288,7 +1288,7 @@
       --secondary-light: #34495e;
       --light-gray: #f5f9fc;
       --medium-gray: #e0e0e0;
-      --dark-gray: #333;
+      --dark-gray: #222;
       --error-color: #d32f2f;
       --warning-color: #FF9800;
       --success-color: #4CAF50;
@@ -1298,6 +1298,55 @@
       --card-radius: 18px;
       --card-shadow: 0 8px 32px rgba(0,0,0,0.13);
     }
+
+    /* Texte zentrieren und dunkler machen */
+    h2, .dashboard-card h3, .farm-card h3, .detail-section h4, .subtitle {
+      text-align: center !important;
+      color: var(--dark-gray) !important;
+    }
+    .dashboard-card, .farm-card, .farm-item-card, .farm-list, .field-detail {
+      color: var(--dark-gray) !important;
+    }
+    .farm-item-name, .detail-label {
+      color: var(--primary-dark) !important;
+    }
+    .dashboard-card h3, .farm-card h3, .detail-section h4 {
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+    }
+    /* Reiter-Leiste (Tabs) bis zum Rand, ohne ovale Linie */
+    nav, nav ul {
+      background: var(--secondary-color) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+    nav ul {
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      min-height: 56px;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    nav a, .tab-btn {
+      border-radius: 0 !important;
+      font-weight: 700 !important;
+      color: #fff !important;
+      background: none !important;
+      font-size: 1.12rem !important;
+      letter-spacing: 0.01em;
+      min-height: 56px;
+      box-shadow: none !important;
+      padding: 16px 28px !important;
+      margin-right: 2px;
+      border-bottom: 2px solid transparent;
+    }
+    nav a:hover, .tab-btn:hover, nav li.active a {
+      background: var(--primary-color) !important;
+      color: #fff !important;
+      border-bottom: 2px solid var(--primary-dark) !important;
+    }
+    /* --- Ende modernes App-Design --- */
     body {
       background: linear-gradient(135deg, #f5f9fc 0%, #e0e0e0 100%);
       min-height: 100vh;
