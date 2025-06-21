@@ -2111,7 +2111,9 @@
       const duration = (growthTable[crop] && growthTable[crop][soil]) ? growthTable[crop][soil] : 200;
       const start = new Date(field.plantingDate);
       const now = new Date();
-      if (isNaN(start.getTime())) return { percent: 0, daysLeft: duration };
+      if (!field.plantingDate || isNaN(start.getTime())) {
+        return { percent: 0, daysLeft: duration };
+      }
       const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
       let percent = Math.round((diff / duration) * 100);
       if (percent < 0) percent = 0;
