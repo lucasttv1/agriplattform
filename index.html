@@ -1280,6 +1280,80 @@
       color: var(--secondary-color);
     }
 
+    /* --- LS25 Menü- und Dashboard-Design --- */
+    :root {
+      --primary-color: #7ed957;
+      --primary-dark: #3e6b2b;
+      --secondary-color: #23272b;
+      --secondary-light: #353a40;
+      --light-gray: #e9ecef;
+      --medium-gray: #b0b4b9;
+      --dark-gray: #181a1b;
+      --error-color: #d32f2f;
+      --warning-color: #FF9800;
+      --success-color: #7ed957;
+      --info-color: #2196F3;
+      --white: #ffffff;
+      --shadow: 0 8px 32px rgba(0,0,0,0.18);
+      --menu-bg: #23272b;
+      --menu-accent: #7ed957;
+      --menu-hover: #353a40;
+      --card-bg: #23272b;
+      --card-radius: 22px;
+      --card-shadow: 0 12px 36px rgba(0,0,0,0.22);
+      --input-bg: #23272b;
+      --input-border: #7ed957;
+      --input-focus: #aaff99;
+      --input-text: #e6f2e6;
+    }
+    nav, .dashboard-card, .farm-card, .farm-item-card, .farm-list, .field-detail {
+      background: var(--card-bg) !important;
+      color: #e6f2e6 !important;
+      border-radius: var(--card-radius) !important;
+      box-shadow: var(--card-shadow) !important;
+      border: 2px solid #23272b !important;
+    }
+    nav a, .tab-btn, .btn-view-all, .action-btn, .edit-btn {
+      border-radius: 12px !important;
+      font-weight: 700 !important;
+      color: var(--primary-color) !important;
+      background: var(--menu-hover) !important;
+      transition: background 0.2s, color 0.2s;
+    }
+    nav a:hover, .tab-btn:hover, .btn-view-all:hover, .action-btn:hover, .edit-btn:hover {
+      background: var(--primary-color) !important;
+      color: #fff !important;
+    }
+    input, select, textarea {
+      background: var(--input-bg) !important;
+      color: var(--input-text) !important;
+      border: 2px solid var(--input-border) !important;
+      border-radius: 10px !important;
+      font-size: 1.08rem !important;
+      padding: 12px 16px !important;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--input-focus) !important;
+      outline: none !important;
+    }
+    .dashboard-card h3, .farm-card h3, .detail-section h4 {
+      color: var(--primary-color) !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.01em;
+      border-bottom: 2px solid var(--primary-color) !important;
+      text-shadow: 0 2px 8px rgba(126,217,87,0.08);
+    }
+    .farm-item-name, .detail-label {
+      color: var(--primary-color) !important;
+      font-weight: 800 !important;
+      text-shadow: 0 2px 8px rgba(126,217,87,0.08);
+    }
+    .farm-item-card:hover, .dashboard-card:hover, .farm-card:hover {
+      box-shadow: 0 16px 48px rgba(126,217,87,0.10) !important;
+      border: 2px solid var(--primary-color) !important;
+    }
+    /* --- Ende LS25 Design --- */
+
     /* Modernes Edit-Button-Design im LS-Stil */
     .edit-btn {
       background: none !important;
