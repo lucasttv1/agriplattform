@@ -185,28 +185,37 @@ function initFieldMap() {
   loadFieldsOnMap();
 }
 
-function loadFieldsOnMap() {
-  const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
-  fields.forEach(field => {
-    if (field.coordinates) {
-      const polygon = L.polygon(field.coordinates, {
-        color: '#4CAF50',
-        fillColor: '#4CAF50',
-        fillOpacity: 0.3
-      });
-      polygon.bindPopup(`
-        <b>${field.name}</b><br>
-        Größe: ${field.size} ha<br>
-        Kultur: ${getCropName(field.crop)}<br>
-        ${field.notes ? `Notizen: ${field.notes}` : ''}
-      `);
-      polygon.addTo(map);
-      drawnItems.addLayer(polygon);
-    }
-  });
+async function loadFieldsOnMap() {
+  if (!map || !drawnItems) return;
+  drawnItems.clearLayers();
+  try {
+    const response = await fetch('/.netlify/functions/getFields');
+    if (!response.ok) throw new Error('Fehler beim Laden der Felder');
+    const data = await response.json();
+    const fields = data.fields || [];
+    fields.forEach(field => {
+      if (field.coordinates) {
+        const polygon = L.polygon(field.coordinates, {
+          color: '#4CAF50',
+          fillColor: '#4CAF50',
+          fillOpacity: 0.3
+        });
+        polygon.bindPopup(`
+          <b>${field.name}</b><br>
+          Größe: ${field.size} ha<br>
+          Kultur: ${getCropName(field.crop)}<br>
+          ${field.notes ? `Notizen: ${field.notes}` : ''}
+        `);
+        polygon.addTo(map);
+        drawnItems.addLayer(polygon);
+      }
+    });
+  } catch (error) {
+    // Fehler beim Laden der Felder auf der Karte ignorieren
+  }
 }
 
-function saveFieldFromModal() {
+async function saveFieldFromModal() {
   if (!currentPolygon || !modalFieldName.value) {
     showNotification('Bitte geben Sie einen Feldnamen ein und zeichnen Sie ein Feld', 'error');
     return;
@@ -217,17 +226,25 @@ function saveFieldFromModal() {
     notes: modalFieldNotes.value,
     size: currentArea.toFixed(2),
     coordinates: currentPolygon.getLatLngs()[0].map(ll => [ll.lat, ll.lng]),
-    id: Date.now().toString()
+    status: 'Wachstum',
+    plantingDate: '',
   };
-  const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
-  fields.push(fieldData);
-  localStorage.setItem('agriFields', JSON.stringify(fields));
-  fieldModal.style.display = 'none';
-  modalFieldName.value = '';
-  modalFieldNotes.value = '';
-  currentPolygon = null;
-  loadFields();
-  showNotification('Feld erfolgreich gespeichert!', 'success');
+  try {
+    const response = await fetch('/.netlify/functions/saveField', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fieldData)
+    });
+    if (!response.ok) throw new Error('Fehler beim Speichern des Feldes');
+    fieldModal.style.display = 'none';
+    modalFieldName.value = '';
+    modalFieldNotes.value = '';
+    currentPolygon = null;
+    loadFields();
+    showNotification('Feld erfolgreich gespeichert!', 'success');
+  } catch (error) {
+    showNotification('Fehler beim Speichern des Feldes', 'error');
+  }
 }
 
 function sendAIMessage() {
