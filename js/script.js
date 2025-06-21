@@ -218,48 +218,62 @@ async function loadFieldsOnMap() {
 }
 
 async function saveFieldFromModal() {
-  if (!currentPolygon || !modalFieldName.value) {
-    showNotification('Bitte geben Sie einen Feldnamen ein und zeichnen Sie ein Feld', 'error');
+  if (!modalFieldName.value) {
+    showNotification('Bitte geben Sie einen Feldnamen ein', 'error');
     return;
   }
-  // Button deaktivieren, um Doppelklick zu verhindern
   if (confirmFieldBtn) confirmFieldBtn.disabled = true;
   if (!modalPlantingDate.value) {
     showNotification('Bitte ein Pflanzdatum auswählen!', 'error');
     if (confirmFieldBtn) confirmFieldBtn.disabled = false;
     return;
   }
-  // ISO-Format sicherstellen
   const plantingDateISO = new Date(modalPlantingDate.value).toISOString().slice(0, 10);
-  const fieldData = {
+  // Laborwerte auslesen
+  const labPh = document.getElementById('modal-lab-ph').value;
+  const labHumus = document.getElementById('modal-lab-humus').value;
+  const labN = document.getElementById('modal-lab-n').value;
+  const labP = document.getElementById('modal-lab-p').value;
+  const labK = document.getElementById('modal-lab-k').value;
+  const labMg = document.getElementById('modal-lab-mg').value;
+  const labCa = document.getElementById('modal-lab-ca').value;
+  // Demo: localStorage-Update
+  let fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+  let fieldData = {
     name: modalFieldName.value,
     crop: modalFieldCrop.value,
     notes: modalFieldNotes.value,
-    size: currentArea.toFixed(2),
-    coordinates: currentPolygon.getLatLngs()[0].map(ll => [ll.lat, ll.lng]),
+    size: currentArea ? currentArea.toFixed(2) : '',
+    coordinates: currentPolygon ? currentPolygon.getLatLngs()[0].map(ll => [ll.lat, ll.lng]) : [],
     status: 'Wachstum',
     plantingDate: plantingDateISO,
-    soilType: modalSoilType.value
+    soilType: modalSoilType.value,
+    labPh, labHumus, labN, labP, labK, labMg, labCa
   };
-  try {
-    const response = await fetch('/.netlify/functions/saveField', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(fieldData)
+  if (window.editingFieldId) {
+    // Update bestehendes Feld
+    fields = fields.map(f => {
+      if (String(f.id) === String(window.editingFieldId)) {
+        return { ...f, ...fieldData, id: f.id };
+      }
+      return f;
     });
-    if (!response.ok) throw new Error('Fehler beim Speichern des Feldes');
-    fieldModal.style.display = 'none';
-    modalFieldName.value = '';
-    modalFieldNotes.value = '';
-    currentPolygon = null;
-    loadFields();
-    await loadFieldsOnMap();
+    showNotification('Feld erfolgreich aktualisiert!', 'success');
+    window.editingFieldId = null;
+  } else {
+    // Neues Feld anlegen
+    fieldData.id = Date.now().toString();
+    fields.push(fieldData);
     showNotification('Feld erfolgreich gespeichert!', 'success');
-  } catch (error) {
-    showNotification('Fehler beim Speichern des Feldes', 'error');
-  } finally {
-    if (confirmFieldBtn) confirmFieldBtn.disabled = false;
   }
+  localStorage.setItem('agriFields', JSON.stringify(fields));
+  fieldModal.style.display = 'none';
+  modalFieldName.value = '';
+  modalFieldNotes.value = '';
+  currentPolygon = null;
+  loadFields();
+  if (typeof loadFieldsOnMap === 'function') await loadFieldsOnMap();
+  if (confirmFieldBtn) confirmFieldBtn.disabled = false;
 }
 
 function sendAIMessage() {

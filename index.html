@@ -1164,24 +1164,29 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       background: rgba(0, 0, 0, 0.5);
       z-index: 2000;
-      justify-content: center;
-      align-items: center;
+      justify-content: flex-start;
+      align-items: flex-start;
     }
 
     .modal-content {
       background: white;
       padding: 30px;
-      border-radius: 12px;
+      border-radius: 0 12px 12px 0;
       width: 90%;
       max-width: 500px;
+      height: 100vh;
       box-shadow: var(--shadow);
-      max-height: 90vh;
       display: flex;
       flex-direction: column;
+      margin: 0;
+      position: relative;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
     }
     .modal-form-scroll {
       overflow-y: auto;
@@ -1273,6 +1278,22 @@
     .btn-secondary {
       background: var(--light-gray);
       color: var(--secondary-color);
+    }
+
+    /* Modernes Edit-Button-Design im LS-Stil */
+    .edit-btn {
+      background: none !important;
+      color: var(--primary-color) !important;
+      border: none !important;
+      font-size: 1.3em !important;
+      padding: 0 6px !important;
+      border-radius: 8px !important;
+      transition: background 0.2s;
+      margin-left: 8px;
+    }
+    .edit-btn:hover {
+      background: var(--menu-hover) !important;
+      color: #fff !important;
     }
   </style>
 </head>
