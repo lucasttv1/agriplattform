@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
   <style>
-    /* ===== VARIABLEN ===== */
     :root {
       --primary-color: #4CAF50;
       --primary-dark: #388E3C;
@@ -16,44 +15,125 @@
       --secondary-light: #34495e;
       --light-gray: #f5f9fc;
       --medium-gray: #e0e0e0;
-      --dark-gray: #333;
+      --dark-gray: #23272b;
       --error-color: #d32f2f;
-      --warning-color: #FF9800;
       --success-color: #4CAF50;
-      --info-color: #2196F3;
       --white: #ffffff;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow: 0 8px 32px rgba(0,0,0,0.13);
+      --card-radius: 18px;
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.13);
     }
-
-    /* ===== GRUNDLEGENDES LAYOUT ===== */
-    * {
-      box-sizing: border-box;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f9fc 0%, #e0e0e0 100%);
+      min-height: 100vh;
+      color: var(--dark-gray);
       margin: 0;
       padding: 0;
     }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
+    h1, h2, h3, h4, h5, h6, .dashboard-card h3, .farm-card h3, .detail-section h4, .subtitle {
+      text-align: center;
       color: var(--dark-gray);
-      background-color: var(--light-gray);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      margin-bottom: 18px;
     }
-
     .container {
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 15px;
     }
-
+    .dashboard-card, .farm-card, .farm-item-card, .farm-list, .field-detail {
+      color: var(--dark-gray);
+      background: #fff;
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      border: none;
+      margin-bottom: 24px;
+      padding: 28px 28px 22px 28px;
+    }
+    .dashboard-card h3, .farm-card h3, .detail-section h4 {
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+    }
+    .farm-item-name, .detail-label {
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+    nav, nav ul {
+      background: var(--secondary-color);
+      border-radius: 0;
+      box-shadow: none;
+      border: none;
+    }
+    nav ul {
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      min-height: 56px;
+      border-bottom: 2px solid var(--primary-color);
+      display: flex;
+      align-items: center;
+    }
+    nav a, .tab-btn {
+      border-radius: 0;
+      font-weight: 700;
+      color: #fff;
+      background: none;
+      font-size: 1.12rem;
+      letter-spacing: 0.01em;
+      min-height: 56px;
+      box-shadow: none;
+      padding: 16px 28px;
+      margin-right: 2px;
+      border-bottom: 2px solid transparent;
+      text-align: center;
+      transition: background 0.2s, color 0.2s, border-bottom 0.2s;
+    }
+    nav a:hover, .tab-btn:hover, nav li.active a {
+      background: var(--primary-color);
+      color: #fff;
+      border-bottom: 2px solid var(--primary-dark);
+    }
+    .btn, .btn-login, .btn-primary, .btn-secondary, .action-btn, .edit-btn, .btn-view-all {
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.08rem;
+      padding: 13px 28px;
+      background: linear-gradient(90deg, var(--primary-color) 60%, var(--primary-dark) 100%);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 16px rgba(76,175,80,0.10);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      margin-bottom: 6px;
+      text-align: center;
+      display: inline-block;
+    }
+    .btn:hover, .btn-login:hover, .btn-primary:hover, .btn-secondary:hover, .action-btn:hover, .edit-btn:hover, .btn-view-all:hover {
+      background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(76,175,80,0.18);
+    }
+    input, select, textarea {
+      border-radius: 10px;
+      border: 2px solid var(--medium-gray);
+      font-size: 1.08rem;
+      padding: 12px 16px;
+      background: #f8fafc;
+      color: var(--dark-gray);
+      transition: border 0.2s, box-shadow 0.2s;
+      text-align: left;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
+    }
     .hidden {
       display: none !important;
     }
-
-    /* ===== APP-CONTAINER ===== */
     #app-container {
       display: flex;
       flex-direction: column;
