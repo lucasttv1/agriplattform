@@ -243,6 +243,7 @@ async function saveFieldFromModal() {
     modalFieldNotes.value = '';
     currentPolygon = null;
     loadFields();
+    await loadFieldsOnMap();
     showNotification('Feld erfolgreich gespeichert!', 'success');
   } catch (error) {
     showNotification('Fehler beim Speichern des Feldes', 'error');
@@ -436,6 +437,7 @@ async function deleteField(id) {
     });
     if (!response.ok) throw new Error('Fehler beim Löschen des Feldes');
     loadFields();
+    await loadFieldsOnMap();
     showNotification('Feld gelöscht!', 'success');
   } catch (error) {
     showNotification('Fehler beim Löschen des Feldes', 'error');
