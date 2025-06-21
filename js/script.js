@@ -331,40 +331,78 @@ function showNotification(message, type = 'info') {
 function loadFarmData() {}
 
 async function loadFields() {
-  if (!fieldsContainer) return;
-  fieldsContainer.innerHTML = '<div class="loading">Lade Felder...</div>';
+  // Beide Bereiche holen
+  const fieldsContainer = document.getElementById('fields-container');
+  const fieldsTableBody = document.getElementById('fields-table-body');
+  if (fieldsContainer) fieldsContainer.innerHTML = '<div class="loading">Lade Felder...</div>';
+  if (fieldsTableBody) fieldsTableBody.innerHTML = '<tr><td colspan="5">Lade Felder...</td></tr>';
   try {
     const response = await fetch('/.netlify/functions/getFields');
     if (!response.ok) throw new Error('Fehler beim Laden der Felder');
-    const fields = await response.json();
-    fieldsContainer.innerHTML = '';
-    if (!fields || fields.length === 0) {
-      fieldsContainer.innerHTML = '<div class="no-data">Keine Felder vorhanden.</div>';
-      return;
+    const data = await response.json();
+    const fields = data.fields || [];
+
+    // Bereich "Mein Betrieb > Felder"
+    if (fieldsContainer) {
+      fieldsContainer.innerHTML = '';
+      if (!fields || fields.length === 0) {
+        fieldsContainer.innerHTML = '<div class="no-data">Keine Felder vorhanden.</div>';
+      } else {
+        fields.forEach(field => {
+          const card = document.createElement('div');
+          card.className = 'farm-item-card';
+          card.innerHTML = `
+            <div class="farm-item-header">
+              <div class="farm-item-name">${field.name}</div>
+            </div>
+            <div class="farm-item-details">
+              <div><strong>Größe:</strong> ${field.size || '-'} ha</div>
+              <div><strong>Kultur:</strong> ${getCropName(field.crop)}</div>
+              <div><strong>Pflanzdatum:</strong> ${field.plantingDate || '-'}</div>
+              <div><strong>Notizen:</strong> ${field.notes || '-'}</div>
+            </div>
+            <button class="delete-btn" data-id="${field.id}"><i class="fas fa-trash"></i></button>
+          `;
+          card.querySelector('.delete-btn').addEventListener('click', function() {
+            deleteField(field.id);
+          });
+          fieldsContainer.appendChild(card);
+        });
+      }
     }
-    fields.forEach(field => {
-      const card = document.createElement('div');
-      card.className = 'farm-item-card';
-      card.innerHTML = `
-        <div class="farm-item-header">
-          <div class="farm-item-name">${field.name}</div>
-        </div>
-        <div class="farm-item-details">
-          <div><strong>Größe:</strong> ${field.size} ha</div>
-          <div><strong>Kultur:</strong> ${getCropName(field.crop)}</div>
-          <div><strong>Pflanzdatum:</strong> ${field.plantingDate || '-'}</div>
-          <div><strong>Notizen:</strong> ${field.notes || '-'}</div>
-        </div>
-        <button class="delete-btn" data-id="${field.id}"><i class="fas fa-trash"></i></button>
-      `;
-      // Delete-Button Event
-      card.querySelector('.delete-btn').addEventListener('click', function() {
-        deleteField(field.id);
-      });
-      fieldsContainer.appendChild(card);
-    });
+
+    // Bereich "Felder" (Tab)
+    if (fieldsTableBody) {
+      fieldsTableBody.innerHTML = '';
+      if (!fields || fields.length === 0) {
+        fieldsTableBody.innerHTML = '<tr><td colspan="5">Keine Felder vorhanden.</td></tr>';
+      } else {
+        fields.forEach(field => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${field.name || '-'}</td>
+            <td>${field.size || '-'}</td>
+            <td>${getCropName(field.crop)}</td>
+            <td><span class="metric-status good">${field.status || '-'}</span></td>
+            <td>
+              <div class="field-actions">
+                <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+                <button class="action-btn delete-btn-table" data-id="${field.id}"><i class="fas fa-trash"></i></button>
+              </div>
+            </td>
+          `;
+          // Delete-Button Event
+          row.querySelector('.delete-btn-table').addEventListener('click', function() {
+            deleteField(field.id);
+          });
+          fieldsTableBody.appendChild(row);
+        });
+      }
+    }
   } catch (error) {
-    fieldsContainer.innerHTML = `<div class="no-data">Fehler beim Laden der Felder.</div>`;
+    if (fieldsContainer) fieldsContainer.innerHTML = `<div class="no-data">Fehler beim Laden der Felder.</div>`;
+    if (fieldsTableBody) fieldsTableBody.innerHTML = '<tr><td colspan="5">Fehler beim Laden der Felder.</td></tr>';
   }
 }
 
