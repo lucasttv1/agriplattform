@@ -224,6 +224,13 @@ async function saveFieldFromModal() {
   }
   // Button deaktivieren, um Doppelklick zu verhindern
   if (confirmFieldBtn) confirmFieldBtn.disabled = true;
+  if (!modalPlantingDate.value) {
+    showNotification('Bitte ein Pflanzdatum auswählen!', 'error');
+    if (confirmFieldBtn) confirmFieldBtn.disabled = false;
+    return;
+  }
+  // ISO-Format sicherstellen
+  const plantingDateISO = new Date(modalPlantingDate.value).toISOString().slice(0, 10);
   const fieldData = {
     name: modalFieldName.value,
     crop: modalFieldCrop.value,
@@ -231,7 +238,7 @@ async function saveFieldFromModal() {
     size: currentArea.toFixed(2),
     coordinates: currentPolygon.getLatLngs()[0].map(ll => [ll.lat, ll.lng]),
     status: 'Wachstum',
-    plantingDate: modalPlantingDate.value,
+    plantingDate: plantingDateISO,
     soilType: modalSoilType.value
   };
   try {
