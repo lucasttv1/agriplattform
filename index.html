@@ -1305,6 +1305,27 @@
       --input-border: #7ed957;
       --input-focus: #aaff99;
       --input-text: #e6f2e6;
+      --glass-bg: rgba(36,38,41,0.82);
+    }
+
+    body {
+      background: var(--glass-bg);
+      backdrop-filter: blur(6px);
+    }
+
+    nav, nav ul, nav a, .tab-btn {
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    nav ul {
+      margin: 0;
+      border-radius: 0 !important;
+    }
+    .dashboard-card, .farm-card, .farm-item-card, .farm-list, .field-detail {
+      box-shadow: var(--card-shadow) !important;
+      border-radius: var(--card-radius) !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
     }
     nav, .dashboard-card, .farm-card, .farm-item-card, .farm-list, .field-detail {
       background: var(--card-bg) !important;
