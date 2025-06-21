@@ -472,7 +472,7 @@ function openEditFieldModal(field) {
             <td>
               <div class="field-actions">
                 <button class="action-btn view-btn" data-coords='${JSON.stringify(field.coordinates || [])}'><i class="fas fa-eye"></i></button>
-                <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
+                <button class="action-btn edit-btn" data-id="${field.id}"><i class="fas fa-edit"></i></button>
                 <button class="action-btn delete-btn-table" data-id="${field.id}"><i class="fas fa-trash"></i></button>
               </div>
             </td>
