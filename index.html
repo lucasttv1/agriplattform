@@ -2086,8 +2086,10 @@
             return;
           }
           fields.forEach(field => {
-            const { name, crop, plantingDate, soilType } = field;
-            const { percent, daysLeft, error } = calcGrowthPercent(field, now);
+            // Akzeptiere sowohl plantingdate (DB) als auch plantingDate (Frontend)
+            const plantingDate = field.plantingDate || field.plantingdate;
+            const { name, crop, soilType } = field;
+            const { percent, daysLeft, error } = calcGrowthPercent({ ...field, plantingDate }, now);
             let color = 'var(--primary-color)';
             if (percent >= 95) color = 'var(--success-color)';
             else if (percent < 60) color = 'var(--warning-color)';
