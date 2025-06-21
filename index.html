@@ -1347,6 +1347,103 @@
       border-bottom: 2px solid var(--primary-dark) !important;
     }
     /* --- Ende modernes App-Design --- */
+
+    /* --- Modernisierung: Lesbarkeit, Zentrierung, Tabs, Buttons, Farben --- */
+    body {
+      background: linear-gradient(135deg, #f5f9fc 0%, #e0e0e0 100%) !important;
+      min-height: 100vh;
+      color: #23272b !important;
+    }
+    h1, h2, h3, h4, h5, h6, .dashboard-card h3, .farm-card h3, .detail-section h4, .subtitle {
+      text-align: center !important;
+      color: #23272b !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.01em;
+    }
+    .dashboard-card, .farm-card, .farm-item-card, .farm-list, .field-detail {
+      color: #23272b !important;
+      background: #fff !important;
+      border-radius: 18px !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13) !important;
+      border: none !important;
+      margin-bottom: 24px !important;
+    }
+    .dashboard-card h3, .farm-card h3, .detail-section h4 {
+      border-bottom: 2px solid #4CAF50 !important;
+      padding-bottom: 10px !important;
+    }
+    .farm-item-name, .detail-label {
+      color: #388E3C !important;
+      font-weight: 800 !important;
+    }
+    nav, nav ul {
+      background: #2C3E50 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+    nav ul {
+      width: 100vw !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      min-height: 56px !important;
+      border-bottom: 2px solid #4CAF50 !important;
+    }
+    nav a, .tab-btn {
+      border-radius: 0 !important;
+      font-weight: 700 !important;
+      color: #fff !important;
+      background: none !important;
+      font-size: 1.12rem !important;
+      letter-spacing: 0.01em !important;
+      min-height: 56px !important;
+      box-shadow: none !important;
+      padding: 16px 28px !important;
+      margin-right: 2px !important;
+      border-bottom: 2px solid transparent !important;
+      text-align: center !important;
+    }
+    nav a:hover, .tab-btn:hover, nav li.active a {
+      background: #4CAF50 !important;
+      color: #fff !important;
+      border-bottom: 2px solid #388E3C !important;
+    }
+    .btn, .btn-login, .btn-primary, .btn-secondary, .action-btn, .edit-btn, .btn-view-all {
+      border-radius: 12px !important;
+      font-weight: 700 !important;
+      font-size: 1.08rem !important;
+      padding: 13px 28px !important;
+      background: linear-gradient(90deg, #4CAF50 60%, #388E3C 100%) !important;
+      color: #fff !important;
+      border: none !important;
+      box-shadow: 0 4px 16px rgba(76,175,80,0.10) !important;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      margin-bottom: 6px;
+      text-align: center !important;
+      display: inline-block !important;
+    }
+    .btn:hover, .btn-login:hover, .btn-primary:hover, .btn-secondary:hover, .action-btn:hover, .edit-btn:hover, .btn-view-all:hover {
+      background: linear-gradient(90deg, #388E3C 0%, #4CAF50 100%) !important;
+      color: #fff !important;
+      box-shadow: 0 8px 32px rgba(76,175,80,0.18) !important;
+    }
+    input, select, textarea {
+      border-radius: 10px !important;
+      border: 2px solid #e0e0e0 !important;
+      font-size: 1.08rem !important;
+      padding: 12px 16px !important;
+      background: #f8fafc !important;
+      color: #23272b !important;
+      transition: border 0.2s, box-shadow 0.2s;
+      text-align: left !important;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #4CAF50 !important;
+      outline: none !important;
+      box-shadow: 0 0 0 3px rgba(76,175,80,0.12) !important;
+    }
+    /* --- Ende Modernisierung --- */
     body {
       background: linear-gradient(135deg, #f5f9fc 0%, #e0e0e0 100%);
       min-height: 100vh;
