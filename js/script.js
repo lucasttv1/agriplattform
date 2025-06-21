@@ -329,7 +329,46 @@ function showNotification(message, type = 'info') {
 
 // Dummy-Implementierungen für Datenfunktionen (können nach Bedarf angepasst werden)
 function loadFarmData() {}
-function loadFields() {}
+
+function loadFields() {
+  if (!fieldsContainer) return;
+  const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+  fieldsContainer.innerHTML = '';
+  if (fields.length === 0) {
+    fieldsContainer.innerHTML = '<div class="no-data">Keine Felder vorhanden.</div>';
+    return;
+  }
+  fields.forEach(field => {
+    const card = document.createElement('div');
+    card.className = 'farm-item-card';
+    card.innerHTML = `
+      <div class="farm-item-header">
+        <div class="farm-item-name">${field.name}</div>
+      </div>
+      <div class="farm-item-details">
+        <div><strong>Größe:</strong> ${field.size} ha</div>
+        <div><strong>Kultur:</strong> ${getCropName(field.crop)}</div>
+        <div><strong>Pflanzdatum:</strong> ${field.plantingDate || '-'}</div>
+        <div><strong>Notizen:</strong> ${field.notes || '-'}</div>
+      </div>
+      <button class="delete-btn" data-id="${field.id}"><i class="fas fa-trash"></i></button>
+    `;
+    // Delete-Button Event
+    card.querySelector('.delete-btn').addEventListener('click', function() {
+      deleteField(field.id);
+    });
+    fieldsContainer.appendChild(card);
+  });
+}
+
+function deleteField(id) {
+  let fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+  fields = fields.filter(f => f.id !== id);
+  localStorage.setItem('agriFields', JSON.stringify(fields));
+  loadFields();
+  showNotification('Feld gelöscht!', 'success');
+}
+
 function loadMachinery() {}
 function loadPersonnel() {}
 function saveFarmDetails(e) { e.preventDefault(); showNotification('Betriebsdaten gespeichert!', 'success'); }
