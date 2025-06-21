@@ -2114,7 +2114,9 @@
       if (!field.plantingDate || isNaN(start.getTime())) {
         return { percent: 0, daysLeft: duration };
       }
-      const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+      // Nur Tage ab Aussaat zählen, negative Werte (Zukunft) = 0
+      let diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+      if (diff < 0) diff = 0;
       let percent = Math.round((diff / duration) * 100);
       if (percent < 0) percent = 0;
       if (percent > 100) percent = 100;
