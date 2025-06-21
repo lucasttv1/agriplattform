@@ -12,58 +12,130 @@ const currentUser = {
 const appContainer = document.getElementById('app-container');
 const usernameElement = document.getElementById('username');
 const navLinks = document.querySelectorAll('nav a');
+const aiChatMessages = document.querySelector('.ai-chat-messages');
+const aiSendBtn = document.getElementById('ai-send-btn');
+const aiQuestion = document.getElementById('ai-question');
 const addFieldBtn = document.getElementById('add-field-btn');
 const fieldsTableBody = document.getElementById('fields-table-body');
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+const farmDetailsForm = document.getElementById('farm-details-form');
+const addFieldForm = document.getElementById('add-field-form');
+const addMachineryForm = document.getElementById('add-machinery-form');
+const addPersonnelForm = document.getElementById('add-personnel-form');
+const fieldsContainer = document.getElementById('fields-container');
+const machineryContainer = document.getElementById('machinery-container');
+const personnelContainer = document.getElementById('personnel-container');
+const drawPolygonBtn = document.getElementById('draw-polygon');
+const deletePolygonBtn = document.getElementById('delete-polygon');
+const fieldModal = document.getElementById('field-modal');
+const closeModalBtns = document.querySelectorAll('.close-modal');
+const confirmFieldBtn = document.getElementById('confirm-field');
+const modalFieldName = document.getElementById('modal-field-name');
+const modalFieldCrop = document.getElementById('modal-field-crop');
+const modalFieldNotes = document.getElementById('modal-field-notes');
+const modalFieldSize = document.getElementById('modal-field-size');
 
-// Initialisierung
+// Leaflet Variablen
+let map;
+let drawnItems;
+let currentPolygon = null;
+let currentArea = 0;
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Datum anzeigen
-  const now = new Date();
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  
-  // Benutzerdaten anzeigen
   usernameElement.textContent = currentUser.name;
-  
-  // Navigation
+
   navLinks.forEach(link => {
     link.addEventListener('click', function(e) {
       e.preventDefault();
       const target = this.getAttribute('href').substring(1);
       showSection(target);
-      
-      // Feldkarte initialisieren, wenn Felderbereich geöffnet wird
       if (target === 'fields') {
         initFieldMap();
       }
     });
   });
-  
-  // Direkt die App anzeigen
+
+  if (aiSendBtn && aiQuestion) {
+    aiSendBtn.addEventListener('click', sendAIMessage);
+    aiQuestion.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendAIMessage();
+      }
+    });
+  }
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.getAttribute('data-tab');
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  if (farmDetailsForm) {
+    farmDetailsForm.addEventListener('submit', saveFarmDetails);
+  }
+  if (addFieldForm) {
+    addFieldForm.addEventListener('submit', addField);
+  }
+  if (addMachineryForm) {
+    addMachineryForm.addEventListener('submit', addMachinery);
+  }
+  if (addPersonnelForm) {
+    addPersonnelForm.addEventListener('submit', addPersonnel);
+  }
+  if (addFieldBtn) {
+    addFieldBtn.addEventListener('click', () => {
+      showSection('my-farm');
+      document.querySelector('[data-tab="farm-fields"]').click();
+    });
+  }
+  if (drawPolygonBtn) {
+    drawPolygonBtn.addEventListener('click', () => {
+      if (map) {
+        new L.Draw.Polygon(map).enable();
+      }
+    });
+  }
+  if (deletePolygonBtn) {
+    deletePolygonBtn.addEventListener('click', () => {
+      if (currentPolygon) {
+        map.removeLayer(currentPolygon);
+        currentPolygon = null;
+      }
+    });
+  }
+  closeModalBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      fieldModal.style.display = 'none';
+    });
+  });
+  if (confirmFieldBtn) {
+    confirmFieldBtn.addEventListener('click', saveFieldFromModal);
+  }
+  loadFarmData();
+  loadFields();
+  loadMachinery();
+  loadPersonnel();
   showApp();
 });
 
-// App anzeigen
 function showApp() {
   appContainer.classList.remove('hidden');
-  
-  // Dashboard als Standard anzeigen
   showSection('dashboard');
 }
 
-// Abschnitt anzeigen
 function showSection(sectionId) {
-  // Alle Abschnitte ausblenden
   document.querySelectorAll('.content-section').forEach(section => {
     section.classList.add('hidden');
   });
-  
-  // Gewünschten Abschnitt anzeigen
   const section = document.getElementById(sectionId);
   if (section) {
     section.classList.remove('hidden');
   }
-  
-  // Navigation aktualisieren
   navLinks.forEach(link => {
     link.parentElement.classList.remove('active');
     if (link.getAttribute('href') === `#${sectionId}`) {
@@ -72,103 +144,170 @@ function showSection(sectionId) {
   });
 }
 
-// Feldkarte initialisieren
 function initFieldMap() {
-  if (!document.getElementById('field-map-container')) return;
-  
-  mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
-  
-  const map = new mapboxgl.Map({
-    container: 'field-map-container',
-    style: 'mapbox://styles/mapbox/satellite-v9',
-    center: [13.404954, 52.520008],
-    zoom: 12
+  const mapContainer = document.getElementById('field-map-container');
+  if (!mapContainer || map) return;
+  map = L.map('field-map-container').setView([51.1657, 10.4515], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+  drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+  const drawControl = new L.Control.Draw({
+    position: 'topright',
+    draw: {
+      polygon: {
+        shapeOptions: {
+          color: '#4CAF50',
+          fillColor: '#4CAF50',
+          fillOpacity: 0.3
+        }
+      },
+      polyline: false,
+      rectangle: false,
+      circle: false,
+      circlemarker: false,
+      marker: false
+    },
+    edit: {
+      featureGroup: drawnItems
+    }
   });
-  
-  // Felder als Polygone darstellen
-  map.on('load', () => {
-    // Nordfeld
-    map.addSource('nordfeld', {
-      'type': 'geojson',
-      'data': {
-        'type': 'Feature',
-        'properties': {},
-        'geometry': {
-          'type': 'Polygon',
-          'coordinates': [[
-            [13.38, 52.53],
-            [13.40, 52.53],
-            [13.40, 52.51],
-            [13.38, 52.51],
-            [13.38, 52.53]
-          ]]
-        }
-      }
-    });
-    
-    map.addLayer({
-      'id': 'nordfeld',
-      'type': 'fill',
-      'source': 'nordfeld',
-      'layout': {},
-      'paint': {
-        'fill-color': '#4CAF50',
-        'fill-opacity': 0.5
-      }
-    });
-    
-    // Südfeld
-    map.addSource('suedfeld', {
-      'type': 'geojson',
-      'data': {
-        'type': 'Feature',
-        'properties': {},
-        'geometry': {
-          'type': 'Polygon',
-          'coordinates': [[
-            [13.42, 52.50],
-            [13.44, 52.50],
-            [13.44, 52.48],
-            [13.42, 52.48],
-            [13.42, 52.50]
-          ]]
-        }
-      }
-    });
-    
-    map.addLayer({
-      'id': 'suedfeld',
-      'type': 'fill',
-      'source': 'suedfeld',
-      'layout': {},
-      'paint': {
-        'fill-color': '#FF9800',
-        'fill-opacity': 0.5
-      }
-    });
-    
-    // Popup für Felder
-    map.on('click', 'nordfeld', (e) => {
-      new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML('<h3>Nordfeld</h3><p>Größe: 42.5 ha</p><p>Aktuelle Kultur: Weizen</p>')
-        .addTo(map);
-    });
-    
-    map.on('click', 'suedfeld', (e) => {
-      new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML('<h3>Südfeld</h3><p>Größe: 38.2 ha</p><p>Aktuelle Kultur: Mais</p>')
-        .addTo(map);
-    });
+  map.addControl(drawControl);
+  map.on(L.Draw.Event.CREATED, (e) => {
+    const layer = e.layer;
+    currentPolygon = layer;
+    currentArea = (L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 10000);
+    modalFieldSize.textContent = currentArea.toFixed(2);
+    fieldModal.style.display = 'block';
+    drawnItems.addLayer(layer);
+  });
+  loadFieldsOnMap();
+}
+
+function loadFieldsOnMap() {
+  const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+  fields.forEach(field => {
+    if (field.coordinates) {
+      const polygon = L.polygon(field.coordinates, {
+        color: '#4CAF50',
+        fillColor: '#4CAF50',
+        fillOpacity: 0.3
+      });
+      polygon.bindPopup(`
+        <b>${field.name}</b><br>
+        Größe: ${field.size} ha<br>
+        Kultur: ${getCropName(field.crop)}<br>
+        ${field.notes ? `Notizen: ${field.notes}` : ''}
+      `);
+      polygon.addTo(map);
+      drawnItems.addLayer(polygon);
+    }
   });
 }
 
-// Benachrichtigung anzeigen
+function saveFieldFromModal() {
+  if (!currentPolygon || !modalFieldName.value) {
+    showNotification('Bitte geben Sie einen Feldnamen ein und zeichnen Sie ein Feld', 'error');
+    return;
+  }
+  const fieldData = {
+    name: modalFieldName.value,
+    crop: modalFieldCrop.value,
+    notes: modalFieldNotes.value,
+    size: currentArea.toFixed(2),
+    coordinates: currentPolygon.getLatLngs()[0].map(ll => [ll.lat, ll.lng]),
+    id: Date.now().toString()
+  };
+  const fields = JSON.parse(localStorage.getItem('agriFields')) || [];
+  fields.push(fieldData);
+  localStorage.setItem('agriFields', JSON.stringify(fields));
+  fieldModal.style.display = 'none';
+  modalFieldName.value = '';
+  modalFieldNotes.value = '';
+  currentPolygon = null;
+  loadFields();
+  showNotification('Feld erfolgreich gespeichert!', 'success');
+}
+
+function sendAIMessage() {
+  const question = aiQuestion.value.trim();
+  if (!question) return;
+  addUserMessage(question);
+  aiQuestion.value = '';
+  setTimeout(() => {
+    const aiResponse = generateAIResponse(question);
+    addAIMessage(aiResponse);
+  }, 1000);
+}
+
+function addUserMessage(text) {
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('message', 'user');
+  messageElement.innerHTML = `
+    <div class="message-content">
+      <div class="message-sender">${currentUser.name.split(' ')[0]}</div>
+      <div class="message-text user-message">${text}</div>
+    </div>
+    <div class="message-avatar">
+      <i class="fas fa-user"></i>
+    </div>
+  `;
+  aiChatMessages.appendChild(messageElement);
+  scrollToBottom();
+}
+
+function addAIMessage(text) {
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('message', 'ai-message');
+  messageElement.innerHTML = `
+    <div class="message-avatar">
+      <i class="fas fa-robot"></i>
+    </div>
+    <div class="message-content">
+      <div class="message-sender">AgriSmart KI</div>
+      <div class="message-text">${text}</div>
+    </div>
+  `;
+  aiChatMessages.appendChild(messageElement);
+  scrollToBottom();
+}
+
+function generateAIResponse(question) {
+  const lowerQuestion = question.toLowerCase();
+  if (lowerQuestion.includes('wetter') || lowerQuestion.includes('prognose')) {
+    return "Die Wettervorhersage für die nächsten 7 Tage zeigt sonniges Wetter mit gelegentlichen Schauern. Die Temperaturen liegen zwischen 18°C und 25°C. Für dein Nordfeld empfehle ich Bewässerung am frühen Morgen.";
+  }
+  if (lowerQuestion.includes('ernte') || lowerQuestion.includes('weizen')) {
+    return "Basierend auf der aktuellen Wachstumsphase und Wettervorhersage empfehle ich, die Weizenernte in etwa 10 Tagen durchzuführen. Der optimale Feuchtigkeitsgehalt liegt bei 14-15%.";
+  }
+  if (lowerQuestion.includes('düng') || lowerQuestion.includes('stickstoff')) {
+    return "Die Bodenanalyse zeigt einen Stickstoffmangel. Ich empfehle 30kg/ha Ammoniumnitrat in den nächsten 5 Tagen auszubringen. Achte auf die Wettervorhersage, um Regen zu nutzen.";
+  }
+  if (lowerQuestion.includes('krankheit') || lowerQuestion.includes('mehltau')) {
+    return "Die Symptome deuten auf Mehltau hin. Eine Behandlung mit Fungizid X in einer Dosierung von 2l/ha wird empfohlen. Anwendung am frühen Morgen bei trockenen Bedingungen.";
+  }
+  if (lowerQuestion.includes('bewässerung') || lowerQuestion.includes('wasser')) {
+    return "Aufgrund der geringen Niederschläge und hohen Temperaturen empfehle ich eine zusätzliche Bewässerung von 20mm in dieser Woche. Ideal wäre eine Tröpfchenbewässerung für dein Maisfeld.";
+  }
+  if (lowerQuestion.includes('rap')) {
+    return "Dein Raps auf der Westwiese ist in 5-7 Tagen erntebereit. Der Ölgehalt ist optimal bei der derzeitigen Witterung. Plane die Ernte für trockene Tage ein.";
+  }
+  if (lowerQuestion.includes('boden') || lowerQuestion.includes('analyse')) {
+    return "Die letzte Bodenanalyse zeigt: pH-Wert 6.8 (optimal), Stickstoff 14 mg/kg (durchschnitt), Phosphor 8 mg/kg (optimal), Kalium 18 mg/kg (optimal).";
+  }
+  return "Das habe ich leider nicht verstanden. Bitte stelle deine Frage anders oder frage nach Ernte, Wetter, Düngung, Bewässerung oder Schädlingsbekämpfung.";
+}
+
+function scrollToBottom() {
+  if (aiChatMessages) {
+    aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+  }
+}
+
 function showNotification(message, type = 'info') {
   const container = document.querySelector('.notification-container');
   if (!container) return;
-  
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.innerHTML = `
@@ -176,13 +315,10 @@ function showNotification(message, type = 'info') {
       ${message}
     </div>
   `;
-  
   container.appendChild(notification);
-  
   setTimeout(() => {
     notification.classList.add('show');
   }, 100);
-  
   setTimeout(() => {
     notification.classList.remove('show');
     setTimeout(() => {
@@ -190,3 +326,14 @@ function showNotification(message, type = 'info') {
     }, 300);
   }, 5000);
 }
+
+// Dummy-Implementierungen für Datenfunktionen (können nach Bedarf angepasst werden)
+function loadFarmData() {}
+function loadFields() {}
+function loadMachinery() {}
+function loadPersonnel() {}
+function saveFarmDetails(e) { e.preventDefault(); showNotification('Betriebsdaten gespeichert!', 'success'); }
+function addField(e) { e.preventDefault(); showNotification('Feld hinzugefügt!', 'success'); }
+function addMachinery(e) { e.preventDefault(); showNotification('Maschine hinzugefügt!', 'success'); }
+function addPersonnel(e) { e.preventDefault(); showNotification('Mitarbeiter hinzugefügt!', 'success'); }
+function getCropName(crop) { switch (crop) { case 'wheat': return 'Weizen'; case 'corn': return 'Mais'; case 'rape': return 'Raps'; case 'barley': return 'Gerste'; case 'oats': return 'Hafer'; case 'potatoes': return 'Kartoffeln'; default: return crop; } }
