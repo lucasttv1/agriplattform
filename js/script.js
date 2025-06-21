@@ -349,6 +349,14 @@ function showNotification(message, type = 'info') {
   }, 5000);
 }
 
+// Karte auf Feld zoomen
+function zoomToField(coordinates) {
+  if (!map || !coordinates || !Array.isArray(coordinates) || coordinates.length === 0) return;
+  // Zoom auf das Polygon
+  map.fitBounds(coordinates);
+  // Optional: Polygon hervorheben (kann erweitert werden)
+}
+
 // Dummy-Implementierungen für Datenfunktionen (können nach Bedarf angepasst werden)
 function loadFarmData() {}
 
@@ -371,24 +379,30 @@ async function loadFields() {
         fieldsContainer.innerHTML = '<div class="no-data">Keine Felder vorhanden.</div>';
       } else {
         fields.forEach(field => {
-          const card = document.createElement('div');
-          card.className = 'farm-item-card';
-          card.innerHTML = `
-            <div class="farm-item-header">
-              <div class="farm-item-name">${field.name}</div>
-            </div>
-            <div class="farm-item-details">
-              <div><strong>Größe:</strong> ${field.size || '-'} ha</div>
-              <div><strong>Kultur:</strong> ${getCropName(field.crop)}</div>
-              <div><strong>Pflanzdatum:</strong> ${field.plantingDate || '-'}</div>
-              <div><strong>Notizen:</strong> ${field.notes || '-'}</div>
-            </div>
-            <button class="delete-btn" data-id="${field.id}"><i class="fas fa-trash"></i></button>
-          `;
-          card.querySelector('.delete-btn').addEventListener('click', function() {
-            deleteField(field.id);
-          });
-          fieldsContainer.appendChild(card);
+        const card = document.createElement('div');
+        card.className = 'farm-item-card';
+        card.innerHTML = `
+        <div class="farm-item-header">
+        <div class="farm-item-name">${field.name}</div>
+        </div>
+        <div class="farm-item-details">
+        <div><strong>Größe:</strong> ${field.size || '-'} ha</div>
+        <div><strong>Kultur:</strong> ${getCropName(field.crop)}</div>
+        <div><strong>Pflanzdatum:</strong> ${field.plantingDate || '-'}</div>
+        <div><strong>Notizen:</strong> ${field.notes || '-'}</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+        <button class="view-btn" data-coords='${JSON.stringify(field.coordinates || [])}'><i class="fas fa-eye"></i></button>
+        <button class="delete-btn" data-id="${field.id}"><i class="fas fa-trash"></i></button>
+        </div>
+        `;
+        card.querySelector('.delete-btn').addEventListener('click', function() {
+        deleteField(field.id);
+        });
+        card.querySelector('.view-btn').addEventListener('click', function() {
+        zoomToField(field.coordinates);
+        });
+        fieldsContainer.appendChild(card);
         });
       }
     }
@@ -408,7 +422,7 @@ async function loadFields() {
             <td><span class="metric-status good">${field.status || '-'}</span></td>
             <td>
               <div class="field-actions">
-                <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+                <button class="action-btn view-btn" data-coords='${JSON.stringify(field.coordinates || [])}'><i class="fas fa-eye"></i></button>
                 <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
                 <button class="action-btn delete-btn-table" data-id="${field.id}"><i class="fas fa-trash"></i></button>
               </div>
@@ -417,6 +431,10 @@ async function loadFields() {
           // Delete-Button Event
           row.querySelector('.delete-btn-table').addEventListener('click', function() {
             deleteField(field.id);
+          });
+          // View-Button Event
+          row.querySelector('.view-btn').addEventListener('click', function() {
+            zoomToField(field.coordinates);
           });
           fieldsTableBody.appendChild(row);
         });
