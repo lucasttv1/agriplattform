@@ -2731,7 +2731,8 @@
         fieldElement.className = 'farm-item-card';
         fieldElement.innerHTML = `
           <div class="farm-item-header">
-            <div class="farm-item-name">${field.name}</div>
+          <div class="farm-item-name">${field.name}</div>
+          <button class="edit-btn" data-id="${field.id}" title="Bearbeiten" style="background:none;border:none;cursor:pointer;color:#2196F3;font-size:1.2em;"><i class="fas fa-edit"></i></button>
           </div>
           <div class="farm-item-details">
             <div><strong>Größe:</strong> ${field.size || '-'} ha</div>
