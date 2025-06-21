@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/lucasttv1/agriplattform#readme",
   "dependencies": {
-    "pg": "^8.16.2"
+    "pg": "^8.11.3"
   }
 }

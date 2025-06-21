@@ -1,2 +1,2 @@
 [build]
-  functions = "netlify/functions"git push -u origin main
+functions = "netlify/functions"
