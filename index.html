@@ -1324,6 +1324,9 @@
       <!-- Dashboard -->
       <section id="dashboard" class="content-section">
         <h2><i class="fas fa-home"></i> Dashboard</h2>
+        <div id="current-date-bar" style="font-size:1.1rem; color:#333; margin-bottom:10px;">
+          <i class="fas fa-calendar-day"></i> Heutiges Datum: <span id="current-date"></span>
+        </div>
         <p class="subtitle">Übersicht über Ihren Betrieb und aktuelle Informationen</p>
         
         <div class="dashboard-grid">
@@ -2065,6 +2068,12 @@
   <script>
     // Dashboard Feldstatus dynamisch befüllen
     document.addEventListener('DOMContentLoaded', function() {
+      // Aktuelles Datum anzeigen
+      const currentDateElem = document.getElementById('current-date');
+      const now = new Date();
+      if (currentDateElem) {
+        currentDateElem.textContent = now.toLocaleDateString('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit' });
+      }
       const dashboardFieldsList = document.getElementById('dashboard-fields-list');
       if (!dashboardFieldsList) return;
       fetch('/.netlify/functions/getFields')
@@ -2078,7 +2087,7 @@
           }
           fields.forEach(field => {
             const { name, crop, plantingDate, soilType } = field;
-            const { percent, daysLeft } = calcGrowthPercent(field);
+            const { percent, daysLeft, error } = calcGrowthPercent(field, now);
             let color = 'var(--primary-color)';
             if (percent >= 95) color = 'var(--success-color)';
             else if (percent < 60) color = 'var(--warning-color)';
@@ -2088,7 +2097,9 @@
                 <div class="field-progress">
                   <div class="progress-bar" style="width: ${percent}%; background-color: ${color};"></div>
                 </div>
-                <div class="field-status">Wachstumsphase: ${percent}% abgeschlossen${daysLeft > 0 ? `, ${daysLeft} Tage bis Ernte` : ', Erntebereit!'}</div>
+                <div class="field-status">
+                  ${error ? `<span style='color:red'>${error}</span>` : `Wachstumsphase: ${percent}% abgeschlossen${daysLeft > 0 ? `, ${daysLeft} Tage bis Ernte` : ', Erntebereit!'}`}
+                </div>
               </div>
             `;
           });
@@ -2096,7 +2107,7 @@
     });
 
     // Hilfsfunktionen für Prognose
-    function calcGrowthPercent(field) {
+    function calcGrowthPercent(field, nowOverride) {
       // Typische Wachstumsdauer in Tagen je Kultur und Bodenart
       const growthTable = {
         wheat:    { sand: 250, loamy_sand: 240, sandy_loam: 230, loam: 220, silty_loam: 225, clay_loam: 230, clay: 240, peat: 260 },
@@ -2109,12 +2120,28 @@
       const crop = field.crop || 'wheat';
       const soil = field.soilType || 'loam';
       const duration = (growthTable[crop] && growthTable[crop][soil]) ? growthTable[crop][soil] : 200;
-      const start = new Date(field.plantingDate);
-      const now = new Date();
-      if (!field.plantingDate || isNaN(start.getTime())) {
-        return { percent: 0, daysLeft: duration };
+      let plantingDate = field.plantingDate;
+      let start;
+      if (!plantingDate) {
+        return { percent: 0, daysLeft: duration, error: 'Kein Pflanzdatum gesetzt' };
       }
-      // Nur Tage ab Aussaat zählen, negative Werte (Zukunft) = 0
+      // Robust für verschiedene Formate
+      if (typeof plantingDate === 'string') {
+        // ISO-Format oder evtl. mit Uhrzeit
+        if (/^\d{4}-\d{2}-\d{2}/.test(plantingDate)) {
+          start = new Date(plantingDate);
+        } else {
+          return { percent: 0, daysLeft: duration, error: 'Ungültiges Datumsformat' };
+        }
+      } else if (plantingDate instanceof Date) {
+        start = plantingDate;
+      } else {
+        return { percent: 0, daysLeft: duration, error: 'Ungültiges Datumsformat' };
+      }
+      if (isNaN(start.getTime())) {
+        return { percent: 0, daysLeft: duration, error: 'Datum nicht interpretierbar' };
+      }
+      const now = nowOverride instanceof Date ? nowOverride : new Date();
       let diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
       if (diff < 0) diff = 0;
       let percent = Math.round((diff / duration) * 100);
