@@ -35,6 +35,8 @@ const modalFieldName = document.getElementById('modal-field-name');
 const modalFieldCrop = document.getElementById('modal-field-crop');
 const modalFieldNotes = document.getElementById('modal-field-notes');
 const modalFieldSize = document.getElementById('modal-field-size');
+const modalPlantingDate = document.getElementById('modal-planting-date');
+const modalSoilType = document.getElementById('modal-soil-type');
 
 // Leaflet Variablen
 let map;
@@ -229,7 +231,8 @@ async function saveFieldFromModal() {
     size: currentArea.toFixed(2),
     coordinates: currentPolygon.getLatLngs()[0].map(ll => [ll.lat, ll.lng]),
     status: 'Wachstum',
-    plantingDate: '',
+    plantingDate: modalPlantingDate.value,
+    soilType: modalSoilType.value
   };
   try {
     const response = await fetch('/.netlify/functions/saveField', {
@@ -389,6 +392,7 @@ async function loadFields() {
         <div><strong>Größe:</strong> ${field.size || '-'} ha</div>
         <div><strong>Kultur:</strong> ${getCropName(field.crop)}</div>
         <div><strong>Pflanzdatum:</strong> ${field.plantingDate || '-'}</div>
+        <div><strong>Bodenart:</strong> ${field.soilType ? getSoilTypeName(field.soilType) : '-'}</div>
         <div><strong>Notizen:</strong> ${field.notes || '-'}</div>
         </div>
         <div style="display:flex; gap:8px;">
@@ -469,3 +473,17 @@ function addField(e) { e.preventDefault(); showNotification('Feld hinzugefügt!'
 function addMachinery(e) { e.preventDefault(); showNotification('Maschine hinzugefügt!', 'success'); }
 function addPersonnel(e) { e.preventDefault(); showNotification('Mitarbeiter hinzugefügt!', 'success'); }
 function getCropName(crop) { switch (crop) { case 'wheat': return 'Weizen'; case 'corn': return 'Mais'; case 'rape': return 'Raps'; case 'barley': return 'Gerste'; case 'oats': return 'Hafer'; case 'potatoes': return 'Kartoffeln'; default: return crop; } }
+
+function getSoilTypeName(type) {
+  switch(type) {
+    case 'sand': return 'Sand';
+    case 'loamy_sand': return 'Sandiger Lehm';
+    case 'sandy_loam': return 'Lehmiger Sand';
+    case 'loam': return 'Lehm';
+    case 'silty_loam': return 'Schluffiger Lehm';
+    case 'clay_loam': return 'Lehmiger Ton';
+    case 'clay': return 'Ton';
+    case 'peat': return 'Torf';
+    default: return type;
+  }
+}
