@@ -220,6 +220,8 @@ async function saveFieldFromModal() {
     showNotification('Bitte geben Sie einen Feldnamen ein und zeichnen Sie ein Feld', 'error');
     return;
   }
+  // Button deaktivieren, um Doppelklick zu verhindern
+  if (confirmFieldBtn) confirmFieldBtn.disabled = true;
   const fieldData = {
     name: modalFieldName.value,
     crop: modalFieldCrop.value,
@@ -244,6 +246,8 @@ async function saveFieldFromModal() {
     showNotification('Feld erfolgreich gespeichert!', 'success');
   } catch (error) {
     showNotification('Fehler beim Speichern des Feldes', 'error');
+  } finally {
+    if (confirmFieldBtn) confirmFieldBtn.disabled = false;
   }
 }
 
@@ -423,12 +427,19 @@ async function loadFields() {
   }
 }
 
-function deleteField(id) {
-  let fields = JSON.parse(localStorage.getItem('agriFields')) || [];
-  fields = fields.filter(f => f.id !== id);
-  localStorage.setItem('agriFields', JSON.stringify(fields));
-  loadFields();
-  showNotification('Feld gelöscht!', 'success');
+async function deleteField(id) {
+  try {
+    const response = await fetch('/.netlify/functions/deleteField', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    if (!response.ok) throw new Error('Fehler beim Löschen des Feldes');
+    loadFields();
+    showNotification('Feld gelöscht!', 'success');
+  } catch (error) {
+    showNotification('Fehler beim Löschen des Feldes', 'error');
+  }
 }
 
 function loadMachinery() {}
