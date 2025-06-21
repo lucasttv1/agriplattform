@@ -413,10 +413,38 @@ async function loadFields() {
         card.querySelector('.view-btn').addEventListener('click', function() {
         zoomToField(field.coordinates);
         });
+        // Edit-Button-Logik
+        const editBtn = card.querySelector('.edit-btn');
+        if (editBtn) {
+          editBtn.addEventListener('click', function() {
+            openEditFieldModal(field);
+          });
+        }
         fieldsContainer.appendChild(card);
         });
       }
     }
+
+// Öffnet das Modal mit vorausgefüllten Felddaten zum Bearbeiten
+function openEditFieldModal(field) {
+  modalFieldName.value = field.name || '';
+  modalFieldCrop.value = field.crop || '';
+  modalPlantingDate.value = (field.plantingDate || field.plantingdate || '').slice(0, 10);
+  modalSoilType.value = field.soilType || '';
+  modalFieldNotes.value = field.notes || '';
+  // Laborwerte
+  document.getElementById('modal-lab-ph').value = field.labPh || '';
+  document.getElementById('modal-lab-humus').value = field.labHumus || '';
+  document.getElementById('modal-lab-n').value = field.labN || '';
+  document.getElementById('modal-lab-p').value = field.labP || '';
+  document.getElementById('modal-lab-k').value = field.labK || '';
+  document.getElementById('modal-lab-mg').value = field.labMg || '';
+  document.getElementById('modal-lab-ca').value = field.labCa || '';
+  // Modal anzeigen
+  fieldModal.style.display = 'block';
+  // Merke die ID für Update
+  window.editingFieldId = field.id;
+}
 
     // Bereich "Felder" (Tab)
     if (fieldsTableBody) {
