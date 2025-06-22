@@ -148,7 +148,17 @@ function showSection(sectionId) {
 
 function initFieldMap() {
   const mapContainer = document.getElementById('field-map-container');
-  if (!mapContainer || map) return;
+  if (!mapContainer) return;
+  // Verhindere Mehrfach-Initialisierung
+  if (map && map._container === mapContainer) {
+    map.invalidateSize();
+    return;
+  }
+  // Falls schon eine Karte existiert, entferne sie komplett
+  if (map) {
+    map.remove();
+    map = null;
+  }
   map = L.map('field-map-container').setView([51.1657, 10.4515], 6);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -177,10 +187,12 @@ function initFieldMap() {
   });
   map.addControl(drawControl);
   map.on(L.Draw.Event.CREATED, (e) => {
+    // Entferne vorherige Zeichnung
+    drawnItems.clearLayers();
     const layer = e.layer;
     currentPolygon = layer;
     currentArea = (L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 10000);
-    modalFieldSize.textContent = currentArea.toFixed(2);
+    modalFieldSize.value = currentArea.toFixed(2);
     fieldModal.style.display = 'block';
     drawnItems.addLayer(layer);
   });
