@@ -169,61 +169,62 @@
       
       <!-- Felder Management -->
       <section id="fields" class="content-section">
-        <h2><i class="fas fa-tractor"></i> Felder Management</h2>
-        <p class="subtitle">Verwalten Sie Ihre Felder, Kulturen und Bewirtschaftungspläne</p>
-        
-        <div class="fields-layout">
-          <div class="card fields-list-card">
-            <div class="card-header">
-              <i class="fas fa-list"></i>
-              <h3>Feldübersicht</h3>
-              <button id="add-field-btn" class="btn" style="margin-left: auto;">
-                <i class="fas fa-plus"></i> Neues Feld
-              </button>
-            </div>
-            <div class="card-content">
-              <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                  <tr style="background-color: #f5f9fc;">
-                    <th style="padding: 12px 15px; text-align: left;">Feldname</th>
-                    <th style="padding: 12px 15px; text-align: left;">Größe (ha)</th>
-                    <th style="padding: 12px 15px; text-align: left;">Kultur</th>
-                    <th style="padding: 12px 15px; text-align: left;">Status</th>
-                    <th style="padding: 12px 15px; text-align: left;">Aktionen</th>
-                  </tr>
-                </thead>
-                <tbody id="fields-table-body">
-                  <tr>
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">Nordfeld</td>
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">42.5</td>
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">Weizen</td>
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
-                      <span style="background:#e8f5e9;color:#4CAF50;padding:4px 10px;border-radius:20px;">Wachstum</span>
-                    </td>
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
-                      <button class="map-tool-btn"><i class="fas fa-eye"></i></button>
-                      <button class="map-tool-btn"><i class="fas fa-edit"></i></button>
-                      <button class="map-tool-btn"><i class="fas fa-trash"></i></button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card field-map-card">
-            <div class="card-header">
-              <i class="fas fa-map"></i>
-              <h3>Feldkarte</h3>
-            </div>
-            <div class="card-content" style="position: relative; padding: 0;">
-              <div id="field-map-container" style="height: 500px;"></div>
-              <div class="map-tools">
-                <button id="draw-polygon" class="map-tool-btn">
-                  <i class="fas fa-draw-polygon"></i> Feld zeichnen
+        <div class="container">
+          <h2><i class="fas fa-tractor"></i> Felder Management</h2>
+          <p class="subtitle">Verwalten Sie Ihre Felder, Kulturen und Bewirtschaftungspläne</p>
+          <div class="fields-layout">
+            <div class="card fields-list-card">
+              <div class="card-header">
+                <i class="fas fa-list"></i>
+                <h3>Feldübersicht</h3>
+                <button id="add-field-btn" class="btn" style="margin-left: auto;">
+                  <i class="fas fa-plus"></i> Neues Feld
                 </button>
-                <button id="delete-polygon" class="map-tool-btn">
-                  <i class="fas fa-trash"></i> Löschen
-                </button>
+              </div>
+              <div class="card-content">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background-color: #f5f9fc;">
+                      <th style="padding: 12px 15px; text-align: left;">Feldname</th>
+                      <th style="padding: 12px 15px; text-align: left;">Größe (ha)</th>
+                      <th style="padding: 12px 15px; text-align: left;">Kultur</th>
+                      <th style="padding: 12px 15px; text-align: left;">Status</th>
+                      <th style="padding: 12px 15px; text-align: left;">Aktionen</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fields-table-body">
+                    <tr>
+                      <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">Nordfeld</td>
+                      <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">42.5</td>
+                      <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">Weizen</td>
+                      <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
+                        <span style="background:#e8f5e9;color:#4CAF50;padding:4px 10px;border-radius:20px;">Wachstum</span>
+                      </td>
+                      <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
+                        <button class="map-tool-btn"><i class="fas fa-eye"></i></button>
+                        <button class="map-tool-btn"><i class="fas fa-edit"></i></button>
+                        <button class="map-tool-btn"><i class="fas fa-trash"></i></button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card field-map-card">
+              <div class="card-header">
+                <i class="fas fa-map"></i>
+                <h3>Feldkarte</h3>
+              </div>
+              <div class="card-content" style="position: relative; padding: 0;">
+                <div id="field-map-container" style="height: 500px;"></div>
+                <div class="map-tools">
+                  <button id="draw-polygon" class="map-tool-btn">
+                    <i class="fas fa-draw-polygon"></i> Feld zeichnen
+                  </button>
+                  <button id="delete-polygon" class="map-tool-btn">
+                    <i class="fas fa-trash"></i> Löschen
+                  </button>
+                </div>
               </div>
             </div>
           </div>
