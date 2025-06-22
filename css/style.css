@@ -169,6 +169,26 @@ main {
   padding: 30px 0;
 }
 
+/* Felder Management Layout */
+.fields-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 32px;
+  align-items: flex-start;
+}
+.fields-list-card {
+  min-width: 0;
+}
+.field-map-card {
+  min-width: 0;
+}
+@media (max-width: 1100px) {
+  .fields-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
 .content-section {
   display: block;
 }
