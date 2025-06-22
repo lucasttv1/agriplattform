@@ -95,7 +95,9 @@ async function loadFieldsOnMap() {
       }
     });
     updateFieldsTable(fields);
-  } catch (error) {}
+  } catch (error) {
+    alert('Fehler beim Laden der Felder: ' + (error.message || error));
+  }
 }
 
 async function saveFieldFromModal() {
@@ -128,7 +130,9 @@ async function saveFieldFromModal() {
     currentPolygon = null;
     await loadFieldsOnMap();
   } catch (error) {
-    alert('Fehler beim Speichern des Feldes!');
+    let msg = 'Fehler beim Speichern des Feldes!';
+    if (error && error.message) msg += '\n' + error.message;
+    alert(msg);
   } finally {
     confirmFieldBtn.disabled = false;
   }
