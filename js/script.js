@@ -51,11 +51,17 @@ function initFieldMap() {
   }, 500);
 
   map.on(L.Draw.Event.CREATED, (e) => {
+    console.log('Polygon gezeichnet, Event ausgelöst:', e);
     drawnItems.clearLayers();
     const layer = e.layer;
     currentPolygon = layer;
-    currentArea = (L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 10000);
-    modalFieldSize.value = currentArea.toFixed(2);
+    if (window.L && L.GeometryUtil && typeof L.GeometryUtil.geodesicArea === 'function') {
+      currentArea = (L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 10000);
+      modalFieldSize.value = currentArea.toFixed(2);
+    } else {
+      alert('Fehler: Leaflet.GeometryUtil ist nicht geladen!');
+      modalFieldSize.value = '0';
+    }
     fieldModal.style.display = 'block';
     drawnItems.addLayer(layer);
   });
