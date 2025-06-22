@@ -271,27 +271,12 @@
       
       <!-- Mein Betrieb -->
       <section id="my-farm" class="content-section">
-        <h2><i class="fas fa-home"></i> Mein Betrieb</h2>
-        <p class="subtitle">Verwalten Sie Ihre Betriebsdaten und Ressourcen</p>
-        
-        <div class="farm-tabs">
-          <button class="tab-btn active" data-tab="farm-details">
-            <i class="fas fa-info-circle"></i> Betriebsdaten
-          </button>
-          <button class="tab-btn" data-tab="farm-fields">
-            <i class="fas fa-tractor"></i> Felder
-          </button>
-          <button class="tab-btn" data-tab="farm-machinery">
-            <i class="fas fa-cogs"></i> Maschinen
-          </button>
-          <button class="tab-btn" data-tab="farm-personnel">
-            <i class="fas fa-users"></i> Personal
-          </button>
-        </div>
-        
-        <!-- Betriebsdaten -->
-        <div id="farm-details" class="tab-content active">
-          <div class="card-grid">
+        <div class="container">
+          <h2><i class="fas fa-home"></i> Mein Betrieb</h2>
+          <p class="subtitle">Verwalten Sie Ihre Betriebsdaten und Ressourcen</p>
+
+          <div class="farm-grid">
+            <!-- Zeile 1: Betriebsstatistiken | Betriebsinformationen -->
             <div class="card">
               <div class="card-header">
                 <i class="fas fa-chart-line"></i>
@@ -318,7 +303,6 @@
                 </div>
               </div>
             </div>
-            
             <div class="card">
               <div class="card-header">
                 <i class="fas fa-info-circle"></i>
@@ -345,7 +329,6 @@
                       </select>
                     </div>
                   </div>
-                  
                   <div>
                     <div class="form-group">
                       <label for="farm-plz">PLZ</label>
@@ -360,227 +343,211 @@
                       <textarea id="farm-description">Familienbetrieb seit 1950, spezialisiert auf Getreideanbau und nachhaltige Landwirtschaft.</textarea>
                     </div>
                   </div>
-                  
                   <button type="submit" class="btn">
                     <i class="fas fa-save"></i> Betriebsdaten speichern
                   </button>
                 </form>
               </div>
             </div>
-          </div>
-        </div>
-        
-        <!-- Felder -->
-        <div id="farm-fields" class="tab-content">
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-plus-circle"></i>
-              <h3>Neues Feld hinzufügen</h3>
-            </div>
-            <div class="card-content">
-              <form id="add-field-form" class="farm-data-form">
-                <div>
-                  <div class="form-group">
-                    <label for="field-name">Feldname</label>
-                    <input type="text" id="field-name" placeholder="Nordfeld">
-                  </div>
-                  <div class="form-group">
-                    <label for="field-size">Größe (ha)</label>
-                    <input type="number" id="field-size" placeholder="42.5">
-                  </div>
-                  <div class="form-group">
-                    <label for="crop-type">Aktuelle Kultur</label>
-                    <select id="crop-type">
-                      <option value="wheat">Weizen</option>
-                      <option value="corn">Mais</option>
-                      <option value="rape">Raps</option>
-                      <option value="barley">Gerste</option>
-                      <option value="oats">Hafer</option>
-                      <option value="potatoes">Kartoffeln</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div>
-                  <div class="form-group">
-                    <label for="planting-date">Pflanzdatum</label>
-                    <input type="date" id="planting-date">
-                  </div>
-                  <div class="form-group">
-                    <label for="field-notes">Notizen</label>
-                    <textarea id="field-notes" placeholder="Besonderheiten oder Hinweise zu diesem Feld..."></textarea>
-                  </div>
-                </div>
-                
-                <button type="submit" class="btn">
-                  <i class="fas fa-plus"></i> Feld hinzufügen
-                </button>
-              </form>
-            </div>
-          </div>
-          
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-list"></i>
-              <h3>Meine Felder</h3>
-            </div>
-            <div class="card-content" id="fields-container">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div style="font-weight: 600; font-size: 1.1rem; color: var(--secondary-color);">Nordfeld</div>
-                    <div>
-                      <button style="background: none; border: none; color: var(--warning); cursor: pointer; margin-left: 10px;"><i class="fas fa-edit"></i></button>
-                      <button style="background: none; border: none; color: var(--error); cursor: pointer; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+
+            <!-- Zeile 2: Neues Feld | Meine Felder -->
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-plus-circle"></i>
+                <h3>Neues Feld hinzufügen</h3>
+              </div>
+              <div class="card-content">
+                <form id="add-field-form" class="farm-data-form">
+                  <div>
+                    <div class="form-group">
+                      <label for="field-name">Feldname</label>
+                      <input type="text" id="field-name" placeholder="Nordfeld">
+                    </div>
+                    <div class="form-group">
+                      <label for="field-size">Größe (ha)</label>
+                      <input type="number" id="field-size" placeholder="42.5">
+                    </div>
+                    <div class="form-group">
+                      <label for="crop-type">Aktuelle Kultur</label>
+                      <select id="crop-type">
+                        <option value="wheat">Weizen</option>
+                        <option value="corn">Mais</option>
+                        <option value="rape">Raps</option>
+                        <option value="barley">Gerste</option>
+                        <option value="oats">Hafer</option>
+                        <option value="potatoes">Kartoffeln</option>
+                      </select>
                     </div>
                   </div>
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div><strong>Größe:</strong> 42.5 ha</div>
-                    <div><strong>Kultur:</strong> Weizen</div>
-                    <div><strong>Pflanzdatum:</strong> 15.10.2024</div>
-                    <div><strong>Status:</strong> <span style="color: var(--success);">Wachstum</span></div>
+                  <div>
+                    <div class="form-group">
+                      <label for="planting-date">Pflanzdatum</label>
+                      <input type="date" id="planting-date">
+                    </div>
+                    <div class="form-group">
+                      <label for="field-notes">Notizen</label>
+                      <textarea id="field-notes" placeholder="Besonderheiten oder Hinweise zu diesem Feld..."></textarea>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn">
+                    <i class="fas fa-plus"></i> Feld hinzufügen
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-list"></i>
+                <h3>Meine Felder</h3>
+              </div>
+              <div class="card-content" id="fields-container">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                  <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                      <div style="font-weight: 600; font-size: 1.1rem; color: var(--secondary-color);">Nordfeld</div>
+                      <div>
+                        <button style="background: none; border: none; color: var(--warning); cursor: pointer; margin-left: 10px;"><i class="fas fa-edit"></i></button>
+                        <button style="background: none; border: none; color: var(--error); cursor: pointer; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                      <div><strong>Größe:</strong> 42.5 ha</div>
+                      <div><strong>Kultur:</strong> Weizen</div>
+                      <div><strong>Pflanzdatum:</strong> 15.10.2024</div>
+                      <div><strong>Status:</strong> <span style="color: var(--success);">Wachstum</span></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        
-        <!-- Maschinen -->
-        <div id="farm-machinery" class="tab-content">
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-plus-circle"></i>
-              <h3>Neue Maschine hinzufügen</h3>
-            </div>
-            <div class="card-content">
-              <form id="add-machinery-form" class="farm-data-form">
-                <div>
-                  <div class="form-group">
-                    <label for="machine-type">Maschinentyp</label>
-                    <select id="machine-type">
-                      <option value="tractor">Traktor</option>
-                      <option value="harvester">Mähdrescher</option>
-                      <option value="sprayer">Spritze</option>
-                      <option value="plow">Pflug</option>
-                      <option value="seeder">Sämaschine</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="machine-brand">Hersteller</label>
-                    <input type="text" id="machine-brand" placeholder="John Deere">
-                  </div>
-                </div>
-                
-                <div>
-                  <div class="form-group">
-                    <label for="machine-model">Modell</label>
-                    <input type="text" id="machine-model" placeholder="Model XYZ">
-                  </div>
-                  <div class="form-group">
-                    <label for="machine-year">Baujahr</label>
-                    <input type="number" id="machine-year" placeholder="2020">
-                  </div>
-                </div>
-                
-                <button type="submit" class="btn">
-                  <i class="fas fa-plus"></i> Maschine hinzufügen
-                </button>
-              </form>
-            </div>
-          </div>
-          
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-list"></i>
-              <h3>Maschinenpark</h3>
-            </div>
-            <div class="card-content" id="machinery-container">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div style="font-weight: 600; font-size: 1.1rem; color: var(--secondary-color);">John Deere 6250R</div>
-                    <div>
-                      <button style="background: none; border: none; color: var(--warning); cursor: pointer; margin-left: 10px;"><i class="fas fa-edit"></i></button>
-                      <button style="background: none; border: none; color: var(--error); cursor: pointer; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+
+            <!-- Zeile 3: Neue Maschine | Maschinenpark -->
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-plus-circle"></i>
+                <h3>Neue Maschine hinzufügen</h3>
+              </div>
+              <div class="card-content">
+                <form id="add-machinery-form" class="farm-data-form">
+                  <div>
+                    <div class="form-group">
+                      <label for="machine-type">Maschinentyp</label>
+                      <select id="machine-type">
+                        <option value="tractor">Traktor</option>
+                        <option value="harvester">Mähdrescher</option>
+                        <option value="sprayer">Spritze</option>
+                        <option value="plow">Pflug</option>
+                        <option value="seeder">Sämaschine</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="machine-brand">Hersteller</label>
+                      <input type="text" id="machine-brand" placeholder="John Deere">
                     </div>
                   </div>
-                  <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
-                    <div><strong>Typ:</strong> Traktor</div>
-                    <div><strong>Baujahr:</strong> 2020</div>
-                    <div><strong>Leistung:</strong> 250 PS</div>
-                    <div><strong>Besonderheiten:</strong> GPS-Steuerung, Frontlader</div>
+                  <div>
+                    <div class="form-group">
+                      <label for="machine-model">Modell</label>
+                      <input type="text" id="machine-model" placeholder="Model XYZ">
+                    </div>
+                    <div class="form-group">
+                      <label for="machine-year">Baujahr</label>
+                      <input type="number" id="machine-year" placeholder="2020">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn">
+                    <i class="fas fa-plus"></i> Maschine hinzufügen
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-list"></i>
+                <h3>Maschinenpark</h3>
+              </div>
+              <div class="card-content" id="machinery-container">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                  <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                      <div style="font-weight: 600; font-size: 1.1rem; color: var(--secondary-color);">John Deere 6250R</div>
+                      <div>
+                        <button style="background: none; border: none; color: var(--warning); cursor: pointer; margin-left: 10px;"><i class="fas fa-edit"></i></button>
+                        <button style="background: none; border: none; color: var(--error); cursor: pointer; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                      <div><strong>Typ:</strong> Traktor</div>
+                      <div><strong>Baujahr:</strong> 2020</div>
+                      <div><strong>Leistung:</strong> 250 PS</div>
+                      <div><strong>Besonderheiten:</strong> GPS-Steuerung, Frontlader</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        
-        <!-- Personal -->
-        <div id="farm-personnel" class="tab-content">
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-user-plus"></i>
-              <h3>Neuen Mitarbeiter hinzufügen</h3>
-            </div>
-            <div class="card-content">
-              <form id="add-personnel-form" class="farm-data-form">
-                <div>
-                  <div class="form-group">
-                    <label for="person-name">Name</label>
-                    <input type="text" id="person-name" placeholder="Max Mustermann">
-                  </div>
-                  <div class="form-group">
-                    <label for="person-role">Position</label>
-                    <select id="person-role">
-                      <option value="farmer">Landwirt</option>
-                      <option value="manager">Betriebsleiter</option>
-                      <option value="mechanic">Mechaniker</option>
-                      <option value="seasonal">Saisonarbeiter</option>
-                      <option value="admin">Verwaltung</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div>
-                  <div class="form-group">
-                    <label for="person-email">E-Mail</label>
-                    <input type="email" id="person-email" placeholder="max@mustermann.de">
-                  </div>
-                  <div class="form-group">
-                    <label for="person-phone">Telefon</label>
-                    <input type="tel" id="person-phone" placeholder="0123 456789">
-                  </div>
-                </div>
-                
-                <button type="submit" class="btn">
-                  <i class="fas fa-plus"></i> Mitarbeiter hinzufügen
-                </button>
-              </form>
-            </div>
-          </div>
-          
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-address-book"></i>
-              <h3>Mitarbeiterliste</h3>
-            </div>
-            <div class="card-content" id="personnel-container">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div style="font-weight: 600; font-size: 1.1rem; color: var(--secondary-color);">Max Mustermann</div>
-                    <div>
-                      <button style="background: none; border: none; color: var(--warning); cursor: pointer; margin-left: 10px;"><i class="fas fa-edit"></i></button>
-                      <button style="background: none; border: none; color: var(--error); cursor: pointer; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+
+            <!-- Zeile 4: Neuer Mitarbeiter | Mitarbeiterliste -->
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-user-plus"></i>
+                <h3>Neuen Mitarbeiter hinzufügen</h3>
+              </div>
+              <div class="card-content">
+                <form id="add-personnel-form" class="farm-data-form">
+                  <div>
+                    <div class="form-group">
+                      <label for="person-name">Name</label>
+                      <input type="text" id="person-name" placeholder="Max Mustermann">
+                    </div>
+                    <div class="form-group">
+                      <label for="person-role">Position</label>
+                      <select id="person-role">
+                        <option value="farmer">Landwirt</option>
+                        <option value="manager">Betriebsleiter</option>
+                        <option value="mechanic">Mechaniker</option>
+                        <option value="seasonal">Saisonarbeiter</option>
+                        <option value="admin">Verwaltung</option>
+                      </select>
                     </div>
                   </div>
-                  <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
-                    <div><strong>Position:</strong> Betriebsleiter</div>
-                    <div><strong>Telefon:</strong> 0123 456789</div>
-                    <div><strong>E-Mail:</strong> max@mustermann.de</div>
-                    <div><strong>Verantwortlichkeiten:</strong> Gesamtleitung, Planung, Finanzen</div>
+                  <div>
+                    <div class="form-group">
+                      <label for="person-email">E-Mail</label>
+                      <input type="email" id="person-email" placeholder="max@mustermann.de">
+                    </div>
+                    <div class="form-group">
+                      <label for="person-phone">Telefon</label>
+                      <input type="tel" id="person-phone" placeholder="0123 456789">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn">
+                    <i class="fas fa-plus"></i> Mitarbeiter hinzufügen
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-address-book"></i>
+                <h3>Mitarbeiterliste</h3>
+              </div>
+              <div class="card-content" id="personnel-container">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                  <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                      <div style="font-weight: 600; font-size: 1.1rem; color: var(--secondary-color);">Max Mustermann</div>
+                      <div>
+                        <button style="background: none; border: none; color: var(--warning); cursor: pointer; margin-left: 10px;"><i class="fas fa-edit"></i></button>
+                        <button style="background: none; border: none; color: var(--error); cursor: pointer; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                      <div><strong>Position:</strong> Betriebsleiter</div>
+                      <div><strong>Telefon:</strong> 0123 456789</div>
+                      <div><strong>E-Mail:</strong> max@mustermann.de</div>
+                      <div><strong>Verantwortlichkeiten:</strong> Gesamtleitung, Planung, Finanzen</div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -177,6 +177,21 @@ main {
   gap: 32px;
   align-items: flex-start;
 }
+
+/* Mein Betrieb Grid Layout */
+.farm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: flex-start;
+  margin-top: 24px;
+}
+@media (max-width: 1100px) {
+  .farm-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
 .fields-list-card {
   min-width: 0;
 }
