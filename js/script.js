@@ -1,4 +1,4 @@
-// Minimalistische, robuste Karten- und Felderfunktion für AgriSmart
+// AgriSmart: Neue, minimalistische Karten- und Felderintegration
 
 // DOM-Elemente
 const drawPolygonBtn = document.getElementById('draw-polygon');
@@ -12,6 +12,7 @@ const modalFieldNotes = document.getElementById('modal-field-notes');
 const modalFieldSize = document.getElementById('modal-field-size');
 const modalPlantingDate = document.getElementById('modal-planting-date');
 const modalSoilType = document.getElementById('modal-soil-type');
+const fieldsTableBody = document.getElementById('fields-table-body');
 
 let map, drawnItems, polygonDrawer, currentPolygon = null, currentArea = 0;
 
@@ -93,6 +94,7 @@ async function loadFieldsOnMap() {
         drawnItems.addLayer(polygon);
       }
     });
+    updateFieldsTable(fields);
   } catch (error) {}
 }
 
@@ -131,3 +133,39 @@ async function saveFieldFromModal() {
     confirmFieldBtn.disabled = false;
   }
 }
+
+function updateFieldsTable(fields) {
+  if (!fieldsTableBody) return;
+  fieldsTableBody.innerHTML = '';
+  if (!fields.length) {
+    fieldsTableBody.innerHTML = '<tr><td colspan="5">Keine Felder vorhanden.</td></tr>';
+    return;
+  }
+  fields.forEach(field => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${field.name || '-'}</td>
+      <td>${field.size || '-'}</td>
+      <td>${field.crop || '-'}</td>
+      <td>${analyseFieldStatus(field)}</td>
+      <td><button class="map-tool-btn" onclick="window.zoomToField && window.zoomToField(${JSON.stringify(field.coordinates)})"><i class="fas fa-eye"></i></button></td>
+    `;
+    fieldsTableBody.appendChild(row);
+  });
+}
+
+function analyseFieldStatus(field) {
+  // Beispiel: Status "Wachstum" oder "Erntebereit" je nach Datum
+  if (!field.plantingDate) return '-';
+  const start = new Date(field.plantingDate);
+  const now = new Date();
+  const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return 'Geplant';
+  if (diff < 90) return `Wachstum (${90 - diff} Tage bis Ernte)`;
+  return 'Erntebereit';
+}
+
+window.zoomToField = function(coords) {
+  if (!map || !coords || !Array.isArray(coords) || !coords.length) return;
+  map.fitBounds(coords);
+};
