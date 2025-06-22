@@ -146,6 +146,8 @@ function showSection(sectionId) {
   });
 }
 
+let polygonDrawer = null;
+
 function initFieldMap() {
   const mapContainer = document.getElementById('field-map-container');
   if (!mapContainer) return;
@@ -165,29 +167,19 @@ function initFieldMap() {
   }).addTo(map);
   drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
+
+  // Nur ein DrawControl für Editieren, nicht für Zeichnen
   const drawControl = new L.Control.Draw({
     position: 'topright',
-    draw: {
-      polygon: {
-        shapeOptions: {
-          color: '#4CAF50',
-          fillColor: '#4CAF50',
-          fillOpacity: 0.3
-        }
-      },
-      polyline: false,
-      rectangle: false,
-      circle: false,
-      circlemarker: false,
-      marker: false
-    },
+    draw: false,
     edit: {
       featureGroup: drawnItems
     }
   });
   map.addControl(drawControl);
+
+  // Event für das eigentliche Zeichnen
   map.on(L.Draw.Event.CREATED, (e) => {
-    // Entferne vorherige Zeichnung
     drawnItems.clearLayers();
     const layer = e.layer;
     currentPolygon = layer;
@@ -196,6 +188,30 @@ function initFieldMap() {
     fieldModal.style.display = 'block';
     drawnItems.addLayer(layer);
   });
+
+  // Button-Handler für Zeichnen
+  if (drawPolygonBtn) {
+    drawPolygonBtn.onclick = () => {
+      if (polygonDrawer) polygonDrawer.disable();
+      polygonDrawer = new L.Draw.Polygon(map, {
+        shapeOptions: {
+          color: '#4CAF50',
+          fillColor: '#4CAF50',
+          fillOpacity: 0.3
+        }
+      });
+      polygonDrawer.enable();
+    };
+  }
+  // Button-Handler für Löschen
+  if (deletePolygonBtn) {
+    deletePolygonBtn.onclick = () => {
+      drawnItems.clearLayers();
+      currentPolygon = null;
+      currentArea = 0;
+      modalFieldSize.value = '0';
+    };
+  }
   loadFieldsOnMap();
 }
 
