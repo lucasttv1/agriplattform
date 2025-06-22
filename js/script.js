@@ -28,10 +28,28 @@ function initFieldMap() {
   map.addLayer(drawnItems);
   const drawControl = new L.Control.Draw({
     position: 'topright',
-    draw: false,
+    draw: {
+      polygon: {
+        shapeOptions: { color: '#2196f3', fillColor: '#2196f3', fillOpacity: 0.3 }
+      },
+      polyline: false,
+      rectangle: false,
+      circle: false,
+      marker: false,
+      circlemarker: false
+    },
     edit: { featureGroup: drawnItems }
   });
   map.addControl(drawControl);
+
+  // Direkt beim Laden das Polygon-Werkzeug aktivieren
+  setTimeout(() => {
+    polygonDrawer = new L.Draw.Polygon(map, {
+      shapeOptions: { color: '#2196f3', fillColor: '#2196f3', fillOpacity: 0.3 }
+    });
+    polygonDrawer.enable();
+  }, 500);
+
   map.on(L.Draw.Event.CREATED, (e) => {
     drawnItems.clearLayers();
     const layer = e.layer;
@@ -41,11 +59,12 @@ function initFieldMap() {
     fieldModal.style.display = 'block';
     drawnItems.addLayer(layer);
   });
+
   if (drawPolygonBtn) {
     drawPolygonBtn.onclick = () => {
       if (polygonDrawer) polygonDrawer.disable();
       polygonDrawer = new L.Draw.Polygon(map, {
-        shapeOptions: { color: '#4CAF50', fillColor: '#4CAF50', fillOpacity: 0.3 }
+        shapeOptions: { color: '#2196f3', fillColor: '#2196f3', fillOpacity: 0.3 }
       });
       polygonDrawer.enable();
     };
