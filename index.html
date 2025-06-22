@@ -49,120 +49,118 @@
     <main>
       <!-- Dashboard -->
       <section id="dashboard" class="content-section active">
-        <h2><i class="fas fa-home"></i> Dashboard</h2>
-        <p class="subtitle">Übersicht über Ihren Betrieb und aktuelle Informationen</p>
-        
-        <div class="card-grid">
-          <!-- Wetterkarte -->
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-cloud-sun"></i>
-              <h3>Wettervorhersage</h3>
+        <div class="container">
+          <h2><i class="fas fa-home"></i> Dashboard</h2>
+          <p class="subtitle">Übersicht über Ihren Betrieb und aktuelle Informationen</p>
+          <div class="dashboard-grid">
+            <!-- Wetterkarte -->
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-cloud-sun"></i>
+                <h3>Wettervorhersage</h3>
+              </div>
+              <div class="card-content">
+                <div class="weather-main">
+                  <div class="weather-icon">
+                    <i class="fas fa-sun"></i>
+                  </div>
+                  <div>
+                    <div style="font-size: 2.5rem; font-weight: bold;">22°C</div>
+                    <div>Sonnig, Musterstadt</div>
+                  </div>
+                </div>
+                <div class="weather-details">
+                  <p><span>Luftfeuchtigkeit</span> <span>65%</span></p>
+                  <p><span>Windgeschwindigkeit</span> <span>12 km/h</span></p>
+                  <p><span>Niederschlag</span> <span>10%</span></p>
+                  <p><span>UV-Index</span> <span>5</span></p>
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                  7-Tage-Vorhersage: Sonnig mit gelegentlichen Schauern
+                </div>
+              </div>
             </div>
-            <div class="card-content">
-              <div class="weather-main">
-                <div class="weather-icon">
-                  <i class="fas fa-sun"></i>
-                </div>
-                <div>
-                  <div style="font-size: 2.5rem; font-weight: bold;">22°C</div>
-                  <div>Sonnig, Musterstadt</div>
-                </div>
+            <!-- Feldstatus -->
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-tractor"></i>
+                <h3>Feldstatus</h3>
               </div>
-              <div class="weather-details">
-                <p><span>Luftfeuchtigkeit</span> <span>65%</span></p>
-                <p><span>Windgeschwindigkeit</span> <span>12 km/h</span></p>
-                <p><span>Niederschlag</span> <span>10%</span></p>
-                <p><span>UV-Index</span> <span>5</span></p>
-              </div>
-              <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
-                7-Tage-Vorhersage: Sonnig mit gelegentlichen Schauern
+              <div class="card-content">
+                <div class="field-item">
+                  <div style="font-weight: 500; margin-bottom: 5px;">Nordfeld (Weizen)</div>
+                  <div class="field-progress">
+                    <div class="progress-bar" style="width: 75%"></div>
+                  </div>
+                  <div style="font-size: 0.9rem; color: var(--text-light);">Wachstumsphase: 75% abgeschlossen, 25 Tage bis Ernte</div>
+                </div>
+                <div class="field-item" style="margin-top: 20px;">
+                  <div style="font-weight: 500; margin-bottom: 5px;">Südfeld (Mais)</div>
+                  <div class="field-progress">
+                    <div class="progress-bar" style="width: 45%"></div>
+                  </div>
+                  <div style="font-size: 0.9rem; color: var(--text-light);">Wachstumsphase: 45% abgeschlossen</div>
+                </div>
+                <a href="#fields" class="btn btn-secondary" style="margin-top: 20px; display: inline-flex; align-items: center;">
+                  <i class="fas fa-arrow-right"></i> Alle Felder anzeigen
+                </a>
               </div>
             </div>
-          </div>
-          
-          <!-- Feldstatus -->
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-tractor"></i>
-              <h3>Feldstatus</h3>
+            <!-- KI-Empfehlungen -->
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-robot"></i>
+                <h3>KI-Empfehlungen</h3>
+              </div>
+              <div class="card-content">
+                <div class="ai-alert">
+                  <i class="fas fa-calendar-check"></i>
+                  <div>
+                    <strong>Ernteempfehlung</strong>
+                    <p>Weizenernte auf Nordfeld in 10 Tagen planen</p>
+                  </div>
+                </div>
+                <div class="ai-alert">
+                  <i class="fas fa-tint"></i>
+                  <div>
+                    <strong>Bewässerung</strong>
+                    <p>Südfeld benötigt zusätzliche Bewässerung von 20mm</p>
+                  </div>
+                </div>
+                <div class="ai-alert">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <div>
+                    <strong>Schädlingswarnung</strong>
+                    <p>Mäßiges Risiko für Kartoffelkäfer</p>
+                  </div>
+                </div>
+                <button class="btn" onclick="showSection('ai')">
+                  <i class="fas fa-comments"></i> KI-Assistent befragen
+                </button>
+              </div>
             </div>
-            <div class="card-content">
-              <div class="field-item">
-                <div style="font-weight: 500; margin-bottom: 5px;">Nordfeld (Weizen)</div>
-                <div class="field-progress">
-                  <div class="progress-bar" style="width: 75%"></div>
-                </div>
-                <div style="font-size: 0.9rem; color: var(--text-light);">Wachstumsphase: 75% abgeschlossen, 25 Tage bis Ernte</div>
+            <!-- Bodenanalyse -->
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-mountain"></i>
+                <h3>Bodenanalyse</h3>
               </div>
-              <div class="field-item" style="margin-top: 20px;">
-                <div style="font-weight: 500; margin-bottom: 5px;">Südfeld (Mais)</div>
-                <div class="field-progress">
-                  <div class="progress-bar" style="width: 45%"></div>
+              <div class="card-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                  <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">pH-Wert</div>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: var(--secondary-color);">6.8</div>
+                    <span style="display: inline-block; padding: 4px 10px; border-radius: 20px; background: #e8f5e9; color: var(--success); font-size: 0.8rem;">Optimal</span>
+                  </div>
+                  <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Stickstoff (N)</div>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: var(--secondary-color);">14</div>
+                    <span style="display: inline-block; padding: 4px 10px; border-radius: 20px; background: #fff8e1; color: var(--warning); font-size: 0.8rem;">Durchschnitt</span>
+                  </div>
                 </div>
-                <div style="font-size: 0.9rem; color: var(--text-light);">Wachstumsphase: 45% abgeschlossen</div>
-              </div>
-              <a href="#fields" class="btn btn-secondary" style="margin-top: 20px; display: inline-flex; align-items: center;">
-                <i class="fas fa-arrow-right"></i> Alle Felder anzeigen
-              </a>
-            </div>
-          </div>
-          
-          <!-- KI-Empfehlungen -->
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-robot"></i>
-              <h3>KI-Empfehlungen</h3>
-            </div>
-            <div class="card-content">
-              <div class="ai-alert">
-                <i class="fas fa-calendar-check"></i>
-                <div>
-                  <strong>Ernteempfehlung</strong>
-                  <p>Weizenernte auf Nordfeld in 10 Tagen planen</p>
+                <div style="padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid var(--info);">
+                  <strong>Empfehlung:</strong> Leichte Stickstoffdüngung in 2 Wochen
                 </div>
-              </div>
-              <div class="ai-alert">
-                <i class="fas fa-tint"></i>
-                <div>
-                  <strong>Bewässerung</strong>
-                  <p>Südfeld benötigt zusätzliche Bewässerung von 20mm</p>
-                </div>
-              </div>
-              <div class="ai-alert">
-                <i class="fas fa-exclamation-triangle"></i>
-                <div>
-                  <strong>Schädlingswarnung</strong>
-                  <p>Mäßiges Risiko für Kartoffelkäfer</p>
-                </div>
-              </div>
-              <button class="btn" onclick="showSection('ai')">
-                <i class="fas fa-comments"></i> KI-Assistent befragen
-              </button>
-            </div>
-          </div>
-          
-          <!-- Bodenanalyse -->
-          <div class="card">
-            <div class="card-header">
-              <i class="fas fa-mountain"></i>
-              <h3>Bodenanalyse</h3>
-            </div>
-            <div class="card-content">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 10px;">
-                  <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">pH-Wert</div>
-                  <div style="font-size: 1.8rem; font-weight: bold; color: var(--secondary-color);">6.8</div>
-                  <span style="display: inline-block; padding: 4px 10px; border-radius: 20px; background: #e8f5e9; color: var(--success); font-size: 0.8rem;">Optimal</span>
-                </div>
-                <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 10px;">
-                  <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Stickstoff (N)</div>
-                  <div style="font-size: 1.8rem; font-weight: bold; color: var(--secondary-color);">14</div>
-                  <span style="display: inline-block; padding: 4px 10px; border-radius: 20px; background: #fff8e1; color: var(--warning); font-size: 0.8rem;">Durchschnitt</span>
-                </div>
-              </div>
-              <div style="padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid var(--info);">
-                <strong>Empfehlung:</strong> Leichte Stickstoffdüngung in 2 Wochen
               </div>
             </div>
           </div>
